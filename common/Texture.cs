@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
 
-namespace LearnOpenTK.Common
+namespace Toy3d.Common
 {
     // A helper class, much like Shader, meant to simplify loading textures.
     public class Texture
@@ -93,16 +93,6 @@ namespace LearnOpenTK.Common
         public Texture(int glHandle)
         {
             Handle = glHandle;
-        }
-
-        // Activate texture
-        // Multiple textures can be bound, if your shader needs more than just one.
-        // If you want to do that, use GL.ActiveTexture to set which slot GL.BindTexture binds to.
-        // The OpenGL standard requires that there be at least 16, but there can be more depending on your graphics card.
-        public void Use(TextureUnit unit)
-        {
-            GL.ActiveTexture(unit);
-            GL.BindTexture(TextureTarget.Texture2D, Handle);
         }
     }
 }

@@ -1,13 +1,17 @@
-﻿using LearnOpenTK.Common;
+﻿using Toy3d.Common;
+using Toy3d.Core;
+
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Mathematics;
 
-namespace LearnOpenTK {
+namespace Toy3d.Window {
     public class Window : GameWindow {
-        private int vao;
-        private Shader shader;
+        private Sprite sprite;
+        private SpriteRenderer renderer;
+        private OrthogonalCamera camera;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 	    : base(gameWindowSettings, nativeWindowSettings) { }
@@ -17,27 +21,37 @@ namespace LearnOpenTK {
 
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-            var vbo = GL.GenBuffer();
-            var vertices = new float[] { 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+            var vertices = new float[] {
+		0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f
+            };
 
-	    vao = GL.GenVertexArray();
-            GL.BindVertexArray(vao);
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-            shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-            shader.UseProgram();
+	    /*
+            var vertices = new float[] {
+		0.0f, 0.5f, 0.0f, 1.0f,
+		0.5f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.5f, 0.0f, 1.0f,
+		0.5f, 0.5f, 1.0f, 1.0f,
+		0.5f, 0.0f, 1.0f, 0.0f
+	    };
+	    */
+
+            var shader = new Shader("Shaders/sprite.vert", "Shaders/sprite.frag");
+            renderer = new SpriteRenderer(shader);
+            sprite = new Sprite("Images/face.png", vertices);
+            camera = new OrthogonalCamera(800, 600, new Vector3(0f, 0f, 1f));
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
 
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            shader.UseProgram();
-            GL.BindVertexArray(vao);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-
+            renderer.Draw(sprite, camera);
             SwapBuffers();
         }
 

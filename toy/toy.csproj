@@ -19,10 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Shaders\shader.frag">
+    <None Update="Shaders\sprite.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Shaders\shader.vert">
+    <None Update="Shaders\sprite.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\face.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

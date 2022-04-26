@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace LearnOpenTK.Common
+namespace Toy3d.Common
 {
     public class Shader
     {
@@ -14,8 +14,7 @@ namespace LearnOpenTK.Common
         public int Program { get { return program; } }
 
         // The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
-        public Shader(string pathVertexShader, string pathFragmentShader)
-        {
+        public Shader(string pathVertexShader, string pathFragmentShader) {
             var vertexSource = File.ReadAllText(pathVertexShader);
             var vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, vertexSource);
@@ -35,7 +34,6 @@ namespace LearnOpenTK.Common
                 var infoLog = GL.GetShaderInfoLog(fragmentShader);
                 throw new Exception($"Error occured whilst compiling fragment shader({fragmentShader}).\n\n{infoLog}");
             }
-
 	    
             program = GL.CreateProgram();
             GL.AttachShader(program, vertexShader);
@@ -73,14 +71,10 @@ namespace LearnOpenTK.Common
             return GL.GetAttribLocation(program, attribName);
         }
 
-        // Uniform setters
-        // Uniforms are variables that can be set by user code, instead of reading them from the VBO.
-        // You use VBOs for vertex-related data, and uniforms for almost everything else.
-
         // Setting a uniform is almost always the exact same, so I'll explain it here once, instead of in every method:
-        //     1. Bind the program you want to set the uniform on
-        //     2. Get a handle to the location of the uniform with GL.GetUniformLocation.
-        //     3. Use the appropriate GL.Uniform* function to set the uniform.
+        //   1. Bind the program you want to set the uniform on
+        //   2. Get a handle to the location of the uniform with GL.GetUniformLocation.
+        //   3. Use the appropriate GL.Uniform* function to set the uniform.
 
         public void SetInt(string name, int data) {
             GL.Uniform1(uniformLocations[name], data);
@@ -96,6 +90,10 @@ namespace LearnOpenTK.Common
 
         public void SetVector3(string name, Vector3 data) {
             GL.Uniform3(uniformLocations[name], data);
+        }
+
+        public void SetVector4(string name, Vector4 data) {
+            GL.Uniform4(uniformLocations[name], data);
         }
     }
 }
