@@ -11,7 +11,7 @@ namespace Toy3d.Core {
                 var t = Matrix4.CreateTranslation(position);
                 var s = Matrix4.CreateScale(scale);
                 var r = Matrix4.CreateRotationX(rotation.X) * Matrix4.CreateRotationY(rotation.Y) * Matrix4.CreateRotationZ(rotation.Z);
-                return t * s * r;
+                return r * s * t;
             }
         }
     }

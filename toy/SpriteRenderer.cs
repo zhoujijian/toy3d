@@ -1,4 +1,3 @@
-using Toy3d.Common;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -10,7 +9,7 @@ namespace Toy3d.Core {
             this.shader = shader;
         }
 
-        public void Draw(Sprite sprite, Matrix4 matrix, OrthogonalCamera camera) {
+        public void Draw(Sprite sprite, Matrix4 matrix, OrthogonalCamera2D camera) {
             shader.UseProgram();
             shader.SetMatrix4("uModel", matrix);
             shader.SetMatrix4("uProjection", camera.ProjectionMatrix);

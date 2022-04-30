@@ -1,5 +1,4 @@
-﻿using Toy3d.Common;
-using Toy3d.Core;
+﻿using Toy3d.Core;
 
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
@@ -12,7 +11,7 @@ using System.Collections.Generic;
 namespace Toy3d.Window {
     public class Window : GameWindow {
         private SpriteRenderer renderer;
-        private OrthogonalCamera camera;
+        private OrthogonalCamera2D camera;
         private List<GameObject> gameObjects = new List<GameObject>();
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
@@ -23,22 +22,34 @@ namespace Toy3d.Window {
 
             var shader = new Shader("Shaders/sprite.vert", "Shaders/sprite.frag");
             renderer = new SpriteRenderer(shader);
-            camera = new OrthogonalCamera(800, 600, new Vector3(0f, 0f, 1f));
+            camera = new OrthogonalCamera2D(800, 600, new Vector3(0f, 0f, 1f));
 
 	    System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
 
-	    LoadScene();		
+            LoadScene();
+            // DebugLoadScene();
+        }
+
+	private void DebugLoadScene() {
+            var sprite = new Sprite(Texture.LoadFromFile("Images/block.png"), Color4.White);
+            var gameObject = new GameObject(sprite);
+            gameObject.Transform.position = new Vector3(50.0f, 50.0f, 0.0f);
+            gameObjects.Add(gameObject);
+
+            System.Diagnostics.Debug.Print("Model matrix:" + gameObject.Transform.ModelMatrix);
         }
 
         private void LoadScene() {
-            var scene = new int[3, 6] {
-		{ 1, 1, 1, 1, 1, 1 },
-		{ 2, 2, 0, 0, 2, 2 },
-		{ 3, 3, 4, 4, 3, 3 }
+            var scene = new int[3, 8] {
+		{ 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 2, 2, 2, 0, 0, 2, 2, 2 },
+		{ 3, 3, 3, 4, 4, 3, 3, 3 }
 	    };
 
+            var width = camera.Width / 8;
+
             for (var r = 0; r < 3; ++r) {
-                for (var c = 0; c < 6; ++c) {
+                for (var c = 0; c < 8; ++c) {
                     Color4 color;
                     string imagePath = null;
 
@@ -56,8 +67,13 @@ namespace Toy3d.Window {
                         }
                         imagePath = "Images/block.png";
                     }
-                    var sprite = new Sprite(Texture.LoadFromFile(imagePath), color);
+                    var texture = Texture.LoadFromFile(imagePath);
+                    var height = texture.ImageHeight * 0.25f;
+                    var sprite = new Sprite(texture, width, height, color);
                     var gameObject = new GameObject(sprite);
+                    var x = (c + 0.5f) * width;
+                    var y = (r + 0.5f) * height;
+                    gameObject.Transform.position = new Vector3(x, y, 0.0f);
                     gameObjects.Add(gameObject);
                 }
             }

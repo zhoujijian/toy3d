@@ -1,6 +1,5 @@
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
-using Toy3d.Common;
 
 namespace Toy3d.Core {
     public class Sprite {

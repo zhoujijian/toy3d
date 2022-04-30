@@ -1,5 +1,3 @@
-using Toy3d.Common;
-
 namespace Toy3d.Core {
     public class GameObject {
         public Transform Transform { get; private set; }
@@ -10,7 +8,7 @@ namespace Toy3d.Core {
             this.Transform = new Transform();
         }
 
-        public void Draw(SpriteRenderer renderer, OrthogonalCamera camera) {
+        public void Draw(SpriteRenderer renderer, OrthogonalCamera2D camera) {
             renderer.Draw(Sprite, Transform.ModelMatrix, camera);
         }
     }
