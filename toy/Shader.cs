@@ -22,20 +22,22 @@ namespace Toy3d.Core
             GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out var codeVertexShader);
             if (codeVertexShader != (int)All.True) {
                 var infoLog = GL.GetShaderInfoLog(vertexShader);
-                throw new Exception($"Error occurred whilst compiling vertex shader({vertexShader}).\n\n{infoLog}");
+                throw new Exception($"Error occurred whilst compiling vertex shader({vertexShader}).\n{infoLog}");
             }
 
-            GL.ShaderSource(GL.CreateShader(ShaderType.FragmentShader), File.ReadAllText(pathFragmentShader));
-            GL.CompileShader(GL.CreateShader(ShaderType.FragmentShader));
-            GL.GetShader(GL.CreateShader(ShaderType.FragmentShader), ShaderParameter.CompileStatus, out var codeFragmentShader);
+            var fragmentSource = File.ReadAllText(pathFragmentShader);
+            var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+            GL.ShaderSource(fragmentShader, fragmentSource);
+            GL.CompileShader(fragmentShader);
+            GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out var codeFragmentShader);
             if (codeFragmentShader != (int)All.True) {
-                var infoLog = GL.GetShaderInfoLog(GL.CreateShader(ShaderType.FragmentShader));
-                throw new Exception($"Error occured whilst compiling fragment shader({GL.CreateShader(ShaderType.FragmentShader)}).\n\n{infoLog}");
+                var infoLog = GL.GetShaderInfoLog(fragmentShader);
+                throw new Exception($"Error occured whilst compiling fragment shader({fragmentShader}).\n{infoLog}");
             }
 	    
             program = GL.CreateProgram();
             GL.AttachShader(program, vertexShader);
-            GL.AttachShader(program, GL.CreateShader(ShaderType.FragmentShader));
+            GL.AttachShader(program, fragmentShader);
             GL.LinkProgram(program);
             GL.GetProgram(program, GetProgramParameterName.LinkStatus, out var code);
             if (code != (int)All.True) {
@@ -44,9 +46,9 @@ namespace Toy3d.Core
             // When the shader program is linked, it no longer needs the individual shaders attached to it;
             // the compiled code is copied into the shader program. Detach them, and then delete them.
             GL.DetachShader(program, vertexShader);
-            GL.DetachShader(program, GL.CreateShader(ShaderType.FragmentShader));
-            GL.DeleteShader(GL.CreateShader(ShaderType.FragmentShader));
+            GL.DetachShader(program, fragmentShader);
             GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
 
             GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out var uniformsCount);
             uniformLocations = new Dictionary<string, int>();

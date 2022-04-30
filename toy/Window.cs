@@ -1,4 +1,5 @@
 ﻿using Toy3d.Core;
+using Toy3d.Samples;
 
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
@@ -14,6 +15,8 @@ namespace Toy3d.Window {
         private OrthogonalCamera2D camera;
         private List<GameObject> gameObjects = new List<GameObject>();
 
+        private BallGameObject ball;
+
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 	    : base(gameWindowSettings, nativeWindowSettings) { }
 
@@ -27,6 +30,8 @@ namespace Toy3d.Window {
 	    System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
 
             LoadScene();
+            LoadBall();
+	    
             // DebugLoadScene();
         }
 
@@ -37,6 +42,14 @@ namespace Toy3d.Window {
             gameObjects.Add(gameObject);
 
             System.Diagnostics.Debug.Print("Model matrix:" + gameObject.Transform.ModelMatrix);
+        }
+
+	private void LoadBall() {
+            var sprite = new Sprite(Texture.LoadFromFile("Images/face.png"), Color4.White);
+            ball = new BallGameObject(sprite, Vector2.One);
+            ball.Transform.scale = new Vector3(0.1f, 0.1f, 1);
+            ball.Transform.position = new Vector3(400, 300, 0);
+            gameObjects.Add(ball);
         }
 
         private void LoadScene() {
@@ -96,6 +109,9 @@ namespace Toy3d.Window {
             base.OnUpdateFrame(e);
             if (KeyboardState.IsKeyDown(Keys.Escape)) {
                 Close();
+            }
+	    else if (KeyboardState.IsKeyDown(Keys.W)) {
+                ball.Move(0.01f, 800, 600);
             }
         }
 
