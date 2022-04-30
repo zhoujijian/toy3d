@@ -9,11 +9,14 @@ namespace Toy3d.Common
     public class Texture
     {
         public readonly int Handle;
+        public readonly int ImageWidth;
+        public readonly int ImageHeight;
 
         public static Texture LoadFromFile(string path)
         {
             // Generate handle
             int handle = GL.GenTexture();
+            int imageWidth, imageHeight;
 
             // Bind the handle
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -24,6 +27,9 @@ namespace Toy3d.Common
             // Load the image
             using (var image = new Bitmap(path))
             {
+                imageWidth = image.Width;
+                imageHeight = image.Height;
+		
                 // Our Bitmap loads from the top-left pixel, whereas OpenGL loads from the bottom-left, causing the texture to be flipped vertically.
                 // This will correct that, making the texture display properly.
                 image.RotateFlip(RotateFlipType.RotateNoneFlipY);
@@ -87,12 +93,14 @@ namespace Toy3d.Common
             // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            return new Texture(handle);
+            return new Texture(handle, imageWidth, imageHeight);
         }
 
-        public Texture(int glHandle)
+        public Texture(int glHandle, int imageWidth, int imageHeight)
         {
             Handle = glHandle;
+            ImageWidth = imageWidth;
+            ImageHeight = imageHeight;
         }
     }
 }
