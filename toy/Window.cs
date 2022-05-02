@@ -16,6 +16,7 @@ namespace Toy3d.Window {
         private List<GameObject> gameObjects = new List<GameObject>();
 
         private BallGameObject ball;
+        private ParticleGenerator particleGenerator;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 	    : base(gameWindowSettings, nativeWindowSettings) { }
@@ -26,12 +27,13 @@ namespace Toy3d.Window {
             var shader = new Shader("Shaders/sprite.vert", "Shaders/sprite.frag");
             renderer = new SpriteRenderer(shader);
             camera = new OrthogonalCamera2D(800, 600, new Vector3(0f, 0f, 1f));
+            particleGenerator = new ParticleGenerator();
 
-	    System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
+            System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
 
-            LoadScene();
+            // LoadScene();
             LoadBall();
-	    
+
             // DebugLoadScene();
         }
 
@@ -101,17 +103,25 @@ namespace Toy3d.Window {
             foreach (var gameObject in gameObjects) {
                 gameObject.Draw(renderer, camera);
             }
-    
+
+            particleGenerator.Draw(camera);
+
             SwapBuffers();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
+
+	    if (KeyboardState.IsKeyDown(Keys.W)) {
+                ball.Move(0.02f, 800, 600);
+                particleGenerator.Update(ball.Transform.position, 0.02f, true);
+                return;
+            }
+
+            particleGenerator.Update(ball.Transform.position, 0.02f, false);
+
             if (KeyboardState.IsKeyDown(Keys.Escape)) {
                 Close();
-            }
-	    else if (KeyboardState.IsKeyDown(Keys.W)) {
-                ball.Move(0.01f, 800, 600);
             }
         }
 
