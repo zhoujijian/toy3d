@@ -1,5 +1,6 @@
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
+using System;
 using System.Collections.Generic;
 
 namespace Toy3d.Core {
@@ -20,6 +21,7 @@ namespace Toy3d.Core {
         private Shader shader;
         private Texture texture;
         private LinkedList<Particle> particles = new LinkedList<Particle>();
+        private Random random = new Random();
 
         public ParticleGenerator() {
             texture = Texture.LoadFromFile("Images/face.png");
@@ -63,24 +65,34 @@ namespace Toy3d.Core {
 		if (lifetime <= 0.0f) {
                     particles.Remove(node);
                 } else {
-                    node.Value = new Particle(node.Value.position, node.Value.color, lifetime);
+                    var c = node.Value.color;
+                    var color = new Color4(c.R, c.G, c.B, c.A - dt);
+                    node.Value = new Particle(node.Value.position, color, lifetime);
                 }
                 node = next;
             }
 
 	    if (moving) {
-		var particle = new Particle(target, Color4.White, 30.0f);
-		particles.AddFirst(particle);
+                var particle = respawnParticle(target, 10.0f);
+                particles.AddFirst(particle);
 	    }
         }
 
 	public void Draw(OrthogonalCamera2D camera) {
             if (particles.Count <= 0) { return; }
+	    
+	    // BlendFunc enabled on Loading Window
+            // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+	    shader.UseProgram();
 
-            foreach (var particle in particles) {
-                shader.UseProgram();
+            var node = particles.Last;
+	    while (node != null) {
+                var particle = node.Value;
+                node = node.Previous;
+
                 shader.SetVector4("uColor", (Vector4)particle.color);
-                shader.SetMatrix4("uModel", Matrix4.CreateScale(0.2f) * Matrix4.CreateTranslation(particle.position));
+                shader.SetMatrix4("uModel", Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(particle.position));
                 shader.SetMatrix4("uProjection", camera.ProjectionMatrix);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
@@ -89,6 +101,17 @@ namespace Toy3d.Core {
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 GL.BindVertexArray(0);
             }
-	}
+
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        }
+
+	private Particle respawnParticle(Vector3 target, float lifetime) {
+            // var randOffset = ((random.Next() % 100) - 50) / 20.0f;
+            var randOffset = 0.0f;
+            var r = (float)random.NextDouble();
+            var g = (float)random.NextDouble();
+            var b = (float)random.NextDouble();
+            return new Particle(target + new Vector3(randOffset, randOffset, 0), new Color4(r, g, b, 1.0f), lifetime);
+        }
     }
 }

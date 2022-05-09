@@ -17,6 +17,7 @@ namespace Toy3d.Window {
 
         private BallGameObject ball;
         private ParticleGenerator particleGenerator;
+        private PostEffect shakeScreen;
 
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 	    : base(gameWindowSettings, nativeWindowSettings) { }
@@ -24,14 +25,17 @@ namespace Toy3d.Window {
         protected override void OnLoad() {
             base.OnLoad();
 
+            GL.Enable(EnableCap.Blend);
+
             var shader = new Shader("Shaders/sprite.vert", "Shaders/sprite.frag");
             renderer = new SpriteRenderer(shader);
             camera = new OrthogonalCamera2D(800, 600, new Vector3(0f, 0f, 1f));
             particleGenerator = new ParticleGenerator();
+            shakeScreen = new PostEffect();
 
             System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
 
-            // LoadScene();
+            LoadScene();
             LoadBall();
 
             // DebugLoadScene();
@@ -97,14 +101,19 @@ namespace Toy3d.Window {
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
 
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, shakeScreen.FramebufferId);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 	    GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
             foreach (var gameObject in gameObjects) {
                 gameObject.Draw(renderer, camera);
             }
-
             particleGenerator.Draw(camera);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            // GL.Clear(ClearBufferMask.ColorBufferBit);
+            // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+            shakeScreen.Draw();
 
             SwapBuffers();
         }
@@ -113,12 +122,12 @@ namespace Toy3d.Window {
             base.OnUpdateFrame(e);
 
 	    if (KeyboardState.IsKeyDown(Keys.W)) {
-                ball.Move(0.02f, 800, 600);
-                particleGenerator.Update(ball.Transform.position, 0.02f, true);
+                ball.Move(0.02f * 4, 800, 600);
+                particleGenerator.Update(ball.Transform.position, (float)e.Time, true);
                 return;
             }
 
-            particleGenerator.Update(ball.Transform.position, 0.02f, false);
+            particleGenerator.Update(ball.Transform.position, (float)e.Time, false);
 
             if (KeyboardState.IsKeyDown(Keys.Escape)) {
                 Close();

@@ -15,12 +15,12 @@ namespace Toy3d.Core
         public static Texture LoadFromFile(string path)
         {
             // Generate handle
-            int handle = GL.GenTexture();
+            int id = GL.GenTexture();
             int imageWidth, imageHeight;
 
             // Bind the handle
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, handle);
+            GL.BindTexture(TextureTarget.Texture2D, id);
 
             // For this example, we're going to use .NET's built-in System.Drawing library to load textures.
 
@@ -93,7 +93,7 @@ namespace Toy3d.Core
             // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            return new Texture(handle, imageWidth, imageHeight);
+            return new Texture(id, imageWidth, imageHeight);
         }
 
         public Texture(int glHandle, int imageWidth, int imageHeight)
