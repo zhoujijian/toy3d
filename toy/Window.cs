@@ -19,6 +19,8 @@ namespace Toy3d.Window {
         private ParticleGenerator particleGenerator;
         private PostEffect shakeScreen;
 
+        private float elapsedSeconds = 0f;
+
         public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 	    : base(gameWindowSettings, nativeWindowSettings) { }
 
@@ -113,7 +115,12 @@ namespace Toy3d.Window {
             // GL.Clear(ClearBufferMask.ColorBufferBit);
             // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-            shakeScreen.Draw();
+            elapsedSeconds += (float)e.Time;
+
+            // shakeScreen.Confuse = true;
+            shakeScreen.Shake = true;
+            shakeScreen.Chaos = true;
+            shakeScreen.Draw(elapsedSeconds);
 
             SwapBuffers();
         }

@@ -58,6 +58,7 @@ namespace Toy3d.Core
                 var uniformName = GL.GetActiveUniform(program, i, out size, out type);
                 var uniformLocation = GL.GetUniformLocation(program, uniformName);
                 uniformLocations.Add(uniformName, uniformLocation);
+                System.Diagnostics.Debug.Print($"uniform: {uniformName} => {uniformLocation}");
             }
         }
 
@@ -80,12 +81,30 @@ namespace Toy3d.Core
             GL.Uniform1(uniformLocations[name], data);
         }
 
+	public void SetInt(string name, int[] data) {
+            var uniformLocation = GL.GetUniformLocation(program, name);
+	    if (uniformLocation < 0) throw new Exception($"uniform ({name}) location not found!");
+            GL.Uniform1(uniformLocation, data.Length, data);
+        }
+
         public void SetFloat(string name, float data) {
             GL.Uniform1(uniformLocations[name], data);
         }
 
-        public void SetMatrix4(string name, Matrix4 data) {
-            GL.UniformMatrix4(uniformLocations[name], true, ref data);
+	public void SetFloat(string name, float[] data) {
+            var uniformLocation = GL.GetUniformLocation(program, name);
+	    if (uniformLocation < 0) throw new Exception($"uniform ({name}) location not found!");
+            GL.Uniform1(uniformLocation, data.Length, data);
+        }
+
+	public void SetVector2(string name, Vector2 data) {
+            GL.Uniform2(uniformLocations[name], data);
+        }
+
+	public void SetVector2(string name, float[] data) {
+	    if (uniformLocations.ContainsKey(name + "[0]"))
+		GL.Uniform2(uniformLocations[name + "[0]"], data.Length / 2, data);
+	    // GL.Uniform2(uniformLocations[name + "[0]"], data.Length / 2, data);
         }
 
         public void SetVector3(string name, Vector3 data) {
@@ -94,6 +113,10 @@ namespace Toy3d.Core
 
         public void SetVector4(string name, Vector4 data) {
             GL.Uniform4(uniformLocations[name], data);
+        }
+
+        public void SetMatrix4(string name, Matrix4 data) {
+            GL.UniformMatrix4(uniformLocations[name], true, ref data);
         }
     }
 }

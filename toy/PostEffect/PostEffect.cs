@@ -7,8 +7,11 @@ namespace Toy3d.Core {
         private int framebufferId;
         private Shader shader;
 
+	public bool Chaos { get; set; }
+	public bool Confuse { get; set; }
+	public bool Shake { get; set; }
 	public int FramebufferId { get { return framebufferId; } }
-
+	
         public PostEffect() {
             // framebuffer
             textureId = GL.GenTexture();
@@ -56,10 +59,53 @@ namespace Toy3d.Core {
 
 	    // shader
             shader = new Shader("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
+
+	    // You must specify <program> to set uniform variables here, otherwise it doesn't work
+	    // Or you can specify in function <Draw> after GL.UserProgram(program)
+
+            int[] edgeKernel = {
+		-1, -1, -1,
+		-1,  8, -1,
+		-1, -1, -1
+	    };
+	    // glUniform1iv
+            GL.ProgramUniform1(shader.Program, GL.GetUniformLocation(shader.Program, "edge_kernel"), edgeKernel.Length, edgeKernel);
+
+            float[] blurKernel = {
+		1.0f/16, 2.0f/16, 1.0f/16,
+		2.0f/16, 4.0f/16, 2.0f/16,
+		1.0f/16, 2.0f/16, 1.0f/16
+	    };
+	    // glUniform1fv
+            GL.ProgramUniform1(shader.Program, GL.GetUniformLocation(shader.Program, "blur_kernel"), blurKernel.Length, blurKernel);
+
+            float offset = 1.0f / 300.0f;
+            // float offset = 0.7f;
+            float[] offsets = {
+		-offset, offset,
+		0,       offset,
+		offset,  offset,
+		-offset, 0,
+		0,       0,
+		offset,  0,
+		-offset, -offset,
+		0,       -offset,
+		offset,  -offset
+	    };
+	    // glUniform2fv
+            GL.ProgramUniform2(shader.Program, GL.GetUniformLocation(shader.Program, "offsets"), offsets.Length / 2, offsets);
         }
 
-	public void Draw() {
+	public void Draw(float time) {
             shader.UseProgram();
+
+            shader.SetInt("chaos", Chaos ? 1 : 0);
+            shader.SetInt("confuse", Confuse ? 1 : 0);
+            shader.SetInt("shake", Shake ? 1 : 0);
+            shader.SetFloat("time", time);
+
+            // System.Diagnostics.Debug.Print($"[PostEffect](Draw)time: {time}, sintime: {System.Math.Sin(time)}, costime: {System.Math.Cos(time)}");
+
             GL.BindVertexArray(vao);
             GL.Disable(EnableCap.DepthTest);
 	    GL.ActiveTexture(0);
