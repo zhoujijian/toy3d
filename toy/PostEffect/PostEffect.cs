@@ -60,8 +60,8 @@ namespace Toy3d.Core {
 	    // shader
             shader = new Shader("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
 
-	    // You must specify <program> to set uniform variables here, otherwise it doesn't work
-	    // Or you can specify in function <Draw> after GL.UserProgram(program)
+	    // You must specify <program> by <GL.ProgramUniform1/2> to set uniform variables here,
+	    // otherwise the uniform variables donot work. Or you can specify it in function <Draw> by call <GL.UseProgram(program)>
 
             int[] edgeKernel = {
 		-1, -1, -1,
@@ -69,7 +69,7 @@ namespace Toy3d.Core {
 		-1, -1, -1
 	    };
 	    // glUniform1iv
-            GL.ProgramUniform1(shader.Program, GL.GetUniformLocation(shader.Program, "edge_kernel"), edgeKernel.Length, edgeKernel);
+            GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "edge_kernel"), edgeKernel.Length, edgeKernel);
 
             float[] blurKernel = {
 		1.0f/16, 2.0f/16, 1.0f/16,
@@ -77,10 +77,9 @@ namespace Toy3d.Core {
 		1.0f/16, 2.0f/16, 1.0f/16
 	    };
 	    // glUniform1fv
-            GL.ProgramUniform1(shader.Program, GL.GetUniformLocation(shader.Program, "blur_kernel"), blurKernel.Length, blurKernel);
+            GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "blur_kernel"), blurKernel.Length, blurKernel);
 
             float offset = 1.0f / 300.0f;
-            // float offset = 0.7f;
             float[] offsets = {
 		-offset, offset,
 		0,       offset,
@@ -93,7 +92,7 @@ namespace Toy3d.Core {
 		offset,  -offset
 	    };
 	    // glUniform2fv
-            GL.ProgramUniform2(shader.Program, GL.GetUniformLocation(shader.Program, "offsets"), offsets.Length / 2, offsets);
+            GL.ProgramUniform2(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "offsets"), offsets.Length / 2, offsets);
         }
 
 	public void Draw(float time) {

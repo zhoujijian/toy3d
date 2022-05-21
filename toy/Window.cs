@@ -18,6 +18,7 @@ namespace Toy3d.Window {
         private BallGameObject ball;
         private ParticleGenerator particleGenerator;
         private PostEffect shakeScreen;
+        private FontRenderer fontRenderer;
 
         private float elapsedSeconds = 0f;
 
@@ -34,6 +35,8 @@ namespace Toy3d.Window {
             camera = new OrthogonalCamera2D(800, 600, new Vector3(0f, 0f, 1f));
             particleGenerator = new ParticleGenerator();
             shakeScreen = new PostEffect();
+
+            fontRenderer = new FontRenderer();
 
             System.Diagnostics.Debug.Print("Orthogonal Camera Projection Matrix:" + System.Environment.NewLine + camera.ProjectionMatrix.ToString());
 
@@ -103,14 +106,14 @@ namespace Toy3d.Window {
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, shakeScreen.FramebufferId);
+            // GL.BindFramebuffer(FramebufferTarget.Framebuffer, shakeScreen.FramebufferId);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 	    GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             foreach (var gameObject in gameObjects) {
                 gameObject.Draw(renderer, camera);
             }
             particleGenerator.Draw(camera);
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            // GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
             // GL.Clear(ClearBufferMask.ColorBufferBit);
             // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -118,9 +121,11 @@ namespace Toy3d.Window {
             elapsedSeconds += (float)e.Time;
 
             // shakeScreen.Confuse = true;
-            shakeScreen.Shake = true;
-            shakeScreen.Chaos = true;
-            shakeScreen.Draw(elapsedSeconds);
+            // shakeScreen.Shake = true;
+            // shakeScreen.Chaos = true;
+            // shakeScreen.Draw(elapsedSeconds);
+
+            fontRenderer.Draw("Hello, I am Jack!", 100, 100, camera);
 
             SwapBuffers();
         }

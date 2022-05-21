@@ -14,7 +14,7 @@ void main()
     gl_Position = vec4(aPositions.x, aPositions.y, 0.0, 1.0);
 
     if (chaos) {
-        float strength = 0.3;
+        float strength = 0.1;
 	frag_aTextureCoords = vec2(aTextureCoords.x + sin(time) * strength, aTextureCoords.y + cos(time) * strength);
     }
     else if (confuse) {

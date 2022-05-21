@@ -11,7 +11,7 @@ namespace Toy3d.Core
         private readonly int program;
         private readonly Dictionary<string, int> uniformLocations;
 
-        public int Program { get { return program; } }
+        public int ProgramId { get { return program; } }
 
         // The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
         public Shader(string pathVertexShader, string pathFragmentShader) {
@@ -81,34 +81,8 @@ namespace Toy3d.Core
             GL.Uniform1(uniformLocations[name], data);
         }
 
-	public void SetInt(string name, int[] data) {
-            var uniformLocation = GL.GetUniformLocation(program, name);
-	    if (uniformLocation < 0) throw new Exception($"uniform ({name}) location not found!");
-            GL.Uniform1(uniformLocation, data.Length, data);
-        }
-
         public void SetFloat(string name, float data) {
             GL.Uniform1(uniformLocations[name], data);
-        }
-
-	public void SetFloat(string name, float[] data) {
-            var uniformLocation = GL.GetUniformLocation(program, name);
-	    if (uniformLocation < 0) throw new Exception($"uniform ({name}) location not found!");
-            GL.Uniform1(uniformLocation, data.Length, data);
-        }
-
-	public void SetVector2(string name, Vector2 data) {
-            GL.Uniform2(uniformLocations[name], data);
-        }
-
-	public void SetVector2(string name, float[] data) {
-	    if (uniformLocations.ContainsKey(name + "[0]"))
-		GL.Uniform2(uniformLocations[name + "[0]"], data.Length / 2, data);
-	    // GL.Uniform2(uniformLocations[name + "[0]"], data.Length / 2, data);
-        }
-
-        public void SetVector3(string name, Vector3 data) {
-            GL.Uniform3(uniformLocations[name], data);
         }
 
         public void SetVector4(string name, Vector4 data) {

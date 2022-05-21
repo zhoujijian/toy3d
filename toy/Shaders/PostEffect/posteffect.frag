@@ -39,8 +39,4 @@ void main()
     else {
 	FragColor = texture(uScreenTexture, frag_aTextureCoords.st);
     }
-
-    // FragColor = vec4(offsets[2].x, offsets[2].y, 1.0, 1.0);
-    // FragColor = vec4(blur_kernel[0], blur_kernel[1], 1.0, 1.0);
-    // FragColor = texture(uScreenTexture, frag_aTextureCoords.st);
 }
