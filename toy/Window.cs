@@ -125,7 +125,7 @@ namespace Toy3d.Window {
             // shakeScreen.Chaos = true;
             // shakeScreen.Draw(elapsedSeconds);
 
-            fontRenderer.Draw("Hello, I am Jack!", 100, 100, camera);
+            fontRenderer.Draw("This is a sample text.", 100, 100, camera);
 
             SwapBuffers();
         }

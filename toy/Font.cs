@@ -22,18 +22,21 @@ namespace Toy3d.Core {
         private Dictionary<char, Character> characters;
 
         public FontRenderer() {
-            var face = new Face(new Library(), File.ReadAllBytes("Resource/FreeSans.ttf"), 0);
-            face.SetPixelSizes(0, 48);
+            characters = new Dictionary<char, Character>();
+
+            var library = new Library();
+            var face = new Face(library, File.ReadAllBytes("Resource/consola.ttf"), 0);
+            face.SetPixelSizes(0, 32);
             GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
             GL.ActiveTexture(TextureUnit.Texture0);
-            characters = new Dictionary<char, Character>();
+
             for (var c = '\u0000'; c <= '\u00ff'; c++) {
 		face.LoadChar(c, LoadFlags.Render, LoadTarget.Normal);
 
 		var textureId = GL.GenTexture();
 		GL.BindTexture(TextureTarget.Texture2D, textureId);
 		GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R8,
-		    face.Glyph.Bitmap.Width, face.Glyph.Bitmap.Rows, 0, PixelFormat.Red, PixelType.Byte, face.Glyph.Bitmap.Buffer);
+		    face.Glyph.Bitmap.Width, face.Glyph.Bitmap.Rows, 0, PixelFormat.Red, PixelType.UnsignedByte, face.Glyph.Bitmap.Buffer);
 		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
 		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
@@ -48,6 +51,8 @@ namespace Toy3d.Core {
                 });
             }
 
+            GL.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
+
             vao = GL.GenVertexArray();
             vbo = GL.GenBuffer();
             GL.BindVertexArray(vao);
@@ -59,15 +64,19 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
 
             shader = new Shader("Shaders/font.vert", "Shaders/font.frag");
+            GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "text"), 0);
+            GL.ProgramUniform3(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "textColor"), 0.5f, 0.9f, 0.8f);
         }
 
 	public void Draw(string text, float x, float y, OrthogonalCamera2D camera) {
-            var proj = camera.ProjectionMatrix;
+            var projection = camera.ProjectionMatrix;
             GL.UseProgram(shader.ProgramId);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "textColor"), 1.0f, 1.0f, 1.0f);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "projection"), true, ref proj);
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "projection"), true, ref projection);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindVertexArray(vao);
+
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            // GL.BlendFunc(0, BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             foreach (var t in text) {
                 var c = characters[t];
@@ -86,13 +95,15 @@ namespace Toy3d.Core {
                 GL.BindTexture(TextureTarget.Texture2D, c.textureId);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
                 GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, vertices.Length * sizeof(float), vertices);
-                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+                // GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                // GL.BindTexture(TextureTarget.Texture2D, 0);
 
                 x += (c.advance >> 6);
             }
 
+	    GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.BindVertexArray(0);
         }
     }
