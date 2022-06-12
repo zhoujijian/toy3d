@@ -47,7 +47,7 @@ namespace Toy3d.Window {
         }
 
 	private void DebugLoadScene() {
-            var sprite = new Sprite(Texture.LoadFromFile("Images/block.png"), Color4.White);
+            var sprite = new Sprite(ImageTexture.LoadFromFile("Images/block.png"), Color4.White);
             var gameObject = new GameObject(sprite);
             gameObject.Transform.position = new Vector3(50.0f, 50.0f, 0.0f);
             gameObjects.Add(gameObject);
@@ -56,7 +56,7 @@ namespace Toy3d.Window {
         }
 
 	private void LoadBall() {
-            var sprite = new Sprite(Texture.LoadFromFile("Images/face.png"), Color4.White);
+            var sprite = new Sprite(ImageTexture.LoadFromFile("Images/face.png"), Color4.White);
             ball = new BallGameObject(sprite, Vector2.One);
             ball.Transform.scale = new Vector3(0.1f, 0.1f, 1);
             ball.Transform.position = new Vector3(400, 300, 0);
@@ -65,10 +65,10 @@ namespace Toy3d.Window {
 
         private void LoadScene() {
             var scene = new int[3, 8] {
-		{ 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 2, 2, 2, 0, 0, 2, 2, 2 },
-		{ 3, 3, 3, 4, 4, 3, 3, 3 }
-	    };
+                { 1, 1, 1, 1, 1, 1, 1, 1 },
+                { 2, 2, 2, 0, 0, 2, 2, 2 },
+                { 3, 3, 3, 4, 4, 3, 3, 3 }
+            };
 
             var width = camera.Width / 8;
 
@@ -91,7 +91,7 @@ namespace Toy3d.Window {
                         }
                         imagePath = "Images/block.png";
                     }
-                    var texture = Texture.LoadFromFile(imagePath);
+                    var texture = ImageTexture.LoadFromFile(imagePath);
                     var height = texture.ImageHeight * 0.25f;
                     var sprite = new Sprite(texture, width, height, color);
                     var gameObject = new GameObject(sprite);
@@ -133,7 +133,7 @@ namespace Toy3d.Window {
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
 
-	    if (KeyboardState.IsKeyDown(Keys.W)) {
+	        if (KeyboardState.IsKeyDown(Keys.W)) {
                 ball.Move(0.02f * 4, 800, 600);
                 particleGenerator.Update(ball.Transform.position, (float)e.Time, true);
                 return;

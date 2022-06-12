@@ -6,8 +6,8 @@ namespace Toy3d.Core {
         private float height;
         private Vector3 position;
 
-	public float Width { get { return width; } }
-	public float Height { get { return height; } }
+        public float Width { get { return width; } }
+        public float Height { get { return height; } }
 
         public OrthogonalCamera2D(float width, float height, Vector3 position) {
             this.width = width;

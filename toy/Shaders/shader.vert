@@ -35,7 +35,11 @@ layout(location = 0) in vec4 aPosition;
 // It's only used in some more advanced OpenGL functions; it's not needed here.
 // So with a call to the vec4 function, we just give it a constant value of 1.0.
 
+uniform mat4 uProjection;
+uniform mat4 uView;
+uniform mat4 uModel;
+
 void main(void)
 {
-    gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
+    gl_Position = uProjection * uView * uModel * vec4(aPosition.x, aPosition.y, aPosition.z, 1.0);
 }

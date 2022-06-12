@@ -6,13 +6,13 @@ using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
 namespace Toy3d.Core
 {
     // A helper class, much like Shader, meant to simplify loading textures.
-    public class Texture
+    public class ImageTexture
     {
         public readonly int Handle;
         public readonly int ImageWidth;
         public readonly int ImageHeight;
 
-        public static Texture LoadFromFile(string path)
+        public static ImageTexture LoadFromFile(string path)
         {
             // Generate handle
             int id = GL.GenTexture();
@@ -93,10 +93,10 @@ namespace Toy3d.Core
             // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            return new Texture(id, imageWidth, imageHeight);
+            return new ImageTexture(id, imageWidth, imageHeight);
         }
 
-        public Texture(int glHandle, int imageWidth, int imageHeight)
+        public ImageTexture(int glHandle, int imageWidth, int imageHeight)
         {
             Handle = glHandle;
             ImageWidth = imageWidth;

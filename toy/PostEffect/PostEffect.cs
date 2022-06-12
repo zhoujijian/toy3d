@@ -7,10 +7,10 @@ namespace Toy3d.Core {
         private int framebufferId;
         private Shader shader;
 
-	public bool Chaos { get; set; }
-	public bool Confuse { get; set; }
-	public bool Shake { get; set; }
-	public int FramebufferId { get { return framebufferId; } }
+        public bool Chaos { get; set; }
+        public bool Confuse { get; set; }
+        public bool Shake { get; set; }
+        public int FramebufferId { get { return framebufferId; } }
 	
         public PostEffect() {
             // framebuffer
@@ -26,20 +26,20 @@ namespace Toy3d.Core {
             framebufferId = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, textureId, 0);
-	    if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete) {
+	        if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete) {
                 throw new System.Exception("[ShakeScreen](Initialize)FramebufferTarget not complete!");
             }
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
-	    // vbo, vao
+	        // vbo, vao
             var vertices = new float[] {
-		-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
-		0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f
-	    };
+                -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
+                0.5f,  0.5f, -0.5f, -0.5f, 0.5f, -0.5f
+            };
             var texcoords = new float[] {
-		0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f
-	    };
+                0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f
+            };
             var vbo1 = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo1);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);

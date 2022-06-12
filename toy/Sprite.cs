@@ -4,15 +4,15 @@ using OpenTK.Graphics.OpenGL4;
 namespace Toy3d.Core {
     public class Sprite {
         public Color4 color = Color4.White;
-        public Texture Texture { get; private set; }
+        public ImageTexture Texture { get; private set; }
 
         public int VertexArrayObject { get; private set; }
         public int VertexBufferObject { get; private set; }
         public float[] Vertices { get; private set; }
 
-        public Sprite(Texture texture) : this(texture, Color4.White) { }
-	public Sprite(Texture texture, Color4 color) : this(texture, texture.ImageWidth, texture.ImageHeight, color) { }
-        public Sprite(Texture texture, float width, float height, Color4 color) {
+        public Sprite(ImageTexture texture) : this(texture, Color4.White) { }
+	public Sprite(ImageTexture texture, Color4 color) : this(texture, texture.ImageWidth, texture.ImageHeight, color) { }
+        public Sprite(ImageTexture texture, float width, float height, Color4 color) {
 	    this.color = color;
             this.Texture = texture;
 	    
