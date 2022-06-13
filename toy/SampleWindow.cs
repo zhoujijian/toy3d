@@ -18,6 +18,8 @@ namespace Toy3d.Samples {
         private float wheelOffsetY;
         private bool firstWheel = true;
 
+        private Light light;
+
         private const float YAW = -90f;
         private const float PITCH = 0f;
 
@@ -56,6 +58,8 @@ namespace Toy3d.Samples {
             camera = new PerspectiveCamera(position, front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
             camera.Yaw = YAW;
             camera.Pitch = PITCH;
+
+            light = new Light(new Vector3(2.0f, 2.0f, -1.0f));
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {
@@ -71,8 +75,12 @@ namespace Toy3d.Samples {
             GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uView"), false, ref view);
             GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uProjection"), false, ref projection);
+            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "objectColor"), 1.0f, 0.5f, 0.31f);
+            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "lightColor"), 1.0f, 1.0f, 1.0f);
             GL.DrawElements(PrimitiveType.Triangles, 3, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
+
+            light.Draw(camera);
 
             SwapBuffers();
         }
