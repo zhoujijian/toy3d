@@ -11,7 +11,7 @@ namespace Toy3d.Core {
         public Light(Vector3 localPosition) {
             LocalPosition = localPosition;
             cube = Primitive.CreateCube();
-            shader = new Shader("Shaders/shader.vert", "Shaders/light.frag");
+            shader = new Shader("Shaders/light.vert", "Shaders/light.frag");
         }
 
         public void Draw(PerspectiveCamera camera) {

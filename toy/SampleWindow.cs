@@ -10,7 +10,7 @@ namespace Toy3d.Samples {
     public class SampleWindow : GameWindow {
         private int vao;
         private int vbo;
-        private int ebo;
+        // private int ebo;
         private Shader shader;
 
         private PerspectiveCamera camera;
@@ -32,21 +32,64 @@ namespace Toy3d.Samples {
             vao = GL.GenVertexArray();
             GL.BindVertexArray(vao);
 
-            var vertices = new float[] {
-                -0.5f, -0.5f, 0.0f,
-                 0.0f,  0.5f, 0.0f,
-                 0.5f, -0.5f, 0.0f
-            };
-            vbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+	    var vertices = new float[] {
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f
+	    };
+
+	    /*
             var indices = new uint[] { 0, 2, 1 };
             ebo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
             GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+	    */
+
+            vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
             GL.EnableVertexAttribArray(0);
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
 
             GL.BindVertexArray(0);
 
@@ -69,7 +112,10 @@ namespace Toy3d.Samples {
             var view = camera.ViewMatrix;
             var projection = camera.ProjectionMatrix;
 
+            // GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+	    
             GL.BindVertexArray(vao);
             GL.UseProgram(shader.ProgramId);
             GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uModel"), false, ref model);
@@ -77,7 +123,9 @@ namespace Toy3d.Samples {
             GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uProjection"), false, ref projection);
             GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "objectColor"), 1.0f, 0.5f, 0.31f);
             GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "lightColor"), 1.0f, 1.0f, 1.0f);
-            GL.DrawElements(PrimitiveType.Triangles, 3, DrawElementsType.UnsignedInt, 0);
+            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "lightWorldPosition"), light.LocalPosition.X, light.LocalPosition.Y, light.LocalPosition.Z);
+            // GL.DrawElements(PrimitiveType.Triangles, 3, DrawElementsType.UnsignedInt, 0);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
             GL.BindVertexArray(0);
 
             light.Draw(camera);
