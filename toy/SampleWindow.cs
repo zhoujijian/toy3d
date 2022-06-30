@@ -33,47 +33,47 @@ namespace Toy3d.Samples {
             GL.BindVertexArray(vao);
 
 	    var vertices = new float[] {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
                 -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
                 -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f
+                0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f                
 	    };
 
 	    /*
@@ -95,14 +95,14 @@ namespace Toy3d.Samples {
 
             shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 
-            var position = new Vector3(0.0f, 0.0f, 3.0f);
+            var position = new Vector3(0.0f, 2.0f, 3.0f);
             var front = new Vector3(0.0f, 0.0f, -1.0f);
             var up = new Vector3(0.0f, 1.0f, 0.0f);
             camera = new PerspectiveCamera(position, front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
             camera.Yaw = YAW;
             camera.Pitch = PITCH;
 
-            light = new Light(new Vector3(2.0f, 2.0f, -1.0f));
+            light = new Light(new Vector3(0.0f, 1.0f, -1.0f));
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {
@@ -124,6 +124,8 @@ namespace Toy3d.Samples {
             GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "objectColor"), 1.0f, 0.5f, 0.31f);
             GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "lightColor"), 1.0f, 1.0f, 1.0f);
             GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "lightWorldPosition"), light.LocalPosition.X, light.LocalPosition.Y, light.LocalPosition.Z);
+            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
+            
             // GL.DrawElements(PrimitiveType.Triangles, 3, DrawElementsType.UnsignedInt, 0);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
             GL.BindVertexArray(0);
