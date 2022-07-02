@@ -19,7 +19,6 @@ namespace Toy3d.Core
             int imageWidth, imageHeight;
 
             // Bind the handle
-            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, id);
 
             // For this example, we're going to use .NET's built-in System.Drawing library to load textures.
@@ -58,15 +57,7 @@ namespace Toy3d.Core
                 //   The format of the pixels, explained above. Since we loaded the pixels as ARGB earlier, we need to use BGRA.
                 //   Data type of the pixels.
                 //   And finally, the actual pixels.
-                GL.TexImage2D(TextureTarget.Texture2D,
-                    0,
-                    PixelInternalFormat.Rgba,
-                    image.Width,
-                    image.Height,
-                    0,
-                    PixelFormat.Bgra,
-                    PixelType.UnsignedByte,
-                    data.Scan0);
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             }
 
             // Now that our texture is loaded, we can set a few settings to affect how the image appears on rendering.
