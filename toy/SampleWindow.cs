@@ -34,7 +34,7 @@ namespace Toy3d.Samples {
 
             vao = GL.GenVertexArray();
 
-	    var vertices = new float[] {
+	        var vertices = new float[] {
                 // positions          // normals           // texture coords
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
@@ -97,7 +97,6 @@ namespace Toy3d.Samples {
             GL.EnableVertexAttribArray(1);
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
             GL.EnableVertexAttribArray(2);
-
             GL.BindVertexArray(0);
 
             shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
@@ -210,20 +209,20 @@ namespace Toy3d.Samples {
 
             if (KeyboardState.IsKeyDown(Keys.Escape)) {
                 Close();
-		return;
+		        return;
             }
 
             var cameraSpeed = 2.5f * (float)args.Time;
             if (KeyboardState.IsKeyDown(Keys.W)) {
                 camera.Position = camera.Position + cameraSpeed * camera.Front;
             }
-	    else if (KeyboardState.IsKeyDown(Keys.S)) {
+	        else if (KeyboardState.IsKeyDown(Keys.S)) {
                 camera.Position = camera.Position - cameraSpeed * camera.Front;
             }
-	    else if (KeyboardState.IsKeyDown(Keys.A)) {
+	        else if (KeyboardState.IsKeyDown(Keys.A)) {
                 camera.Position = camera.Position - cameraSpeed * (Vector3.Cross(camera.Front, camera.Up));
             }
-	    else if (KeyboardState.IsKeyDown(Keys.D)) {
+	        else if (KeyboardState.IsKeyDown(Keys.D)) {
                 camera.Position = camera.Position + cameraSpeed * (Vector3.Cross(camera.Front, camera.Up));
             }
         }
@@ -236,13 +235,14 @@ namespace Toy3d.Samples {
         protected override void OnMouseMove(MouseMoveEventArgs e) {
             base.OnMouseMove(e);
 
-	    if (!mouseDown) return;
+	        if (!mouseDown) return;
 
             camera.Yaw = camera.Yaw + e.DeltaX * camera.Sensitivity;
             camera.Pitch = camera.Pitch + (-e.DeltaY) * camera.Sensitivity;
             if (camera.Pitch >  89.0f) { camera.Pitch =  89.0f; }
             if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }
 	    
+            // 按照pitch俯仰角计算y分量及在xz平面的投影 => 按照yaw偏航角计算xz平面的投影的x/z值
             var radYaw = MathHelper.DegreesToRadians(camera.Yaw);
             var radPitch = MathHelper.DegreesToRadians(camera.Pitch);
             var frontx = MathHelper.Cos(radPitch) * MathHelper.Cos(radYaw);
@@ -259,7 +259,7 @@ namespace Toy3d.Samples {
         protected override void OnMouseWheel(MouseWheelEventArgs e) {
             base.OnMouseWheel(e);
 
-	    if (firstWheel) {
+            if (firstWheel) {
                 firstWheel = false;
                 wheelOffsetY = e.OffsetY;
                 return;

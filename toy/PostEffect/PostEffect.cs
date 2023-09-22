@@ -57,45 +57,45 @@ namespace Toy3d.Core {
             GL.EnableVertexAttribArray(1);
             GL.BindVertexArray(0);
 
-	    // shader
+	        // shader
             shader = new Shader("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
 
-	    // You must specify <program> by <GL.ProgramUniform1/2> to set uniform variables here,
-	    // otherwise the uniform variables donot work. Or you can specify it in function <Draw> by call <GL.UseProgram(program)>
+	        // You must specify <program> by <GL.ProgramUniform1/2> to set uniform variables here,
+	        // otherwise the uniform variables donot work. Or you can specify it in function <Draw> by call <GL.UseProgram(program)>
 
             int[] edgeKernel = {
-		-1, -1, -1,
-		-1,  8, -1,
-		-1, -1, -1
-	    };
-	    // glUniform1iv
+                -1, -1, -1,
+                -1,  8, -1,
+                -1, -1, -1
+            };
+            // glUniform1iv
             GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "edge_kernel"), edgeKernel.Length, edgeKernel);
 
             float[] blurKernel = {
-		1.0f/16, 2.0f/16, 1.0f/16,
-		2.0f/16, 4.0f/16, 2.0f/16,
-		1.0f/16, 2.0f/16, 1.0f/16
-	    };
-	    // glUniform1fv
+                1.0f/16, 2.0f/16, 1.0f/16,
+                2.0f/16, 4.0f/16, 2.0f/16,
+                1.0f/16, 2.0f/16, 1.0f/16
+            };
+            // glUniform1fv
             GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "blur_kernel"), blurKernel.Length, blurKernel);
 
             float offset = 1.0f / 300.0f;
             float[] offsets = {
-		-offset, offset,
-		0,       offset,
-		offset,  offset,
-		-offset, 0,
-		0,       0,
-		offset,  0,
-		-offset, -offset,
-		0,       -offset,
-		offset,  -offset
-	    };
-	    // glUniform2fv
+                -offset, offset,
+                0,       offset,
+                offset,  offset,
+                -offset, 0,
+                0,       0,
+                offset,  0,
+                -offset, -offset,
+                0,       -offset,
+                offset,  -offset
+            };
+            // glUniform2fv
             GL.ProgramUniform2(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "offsets"), offsets.Length / 2, offsets);
         }
 
-	public void Draw(float time) {
+	    public void Draw(float time) {
             shader.UseProgram();
 
             shader.SetInt("chaos", Chaos ? 1 : 0);
@@ -107,7 +107,7 @@ namespace Toy3d.Core {
 
             GL.BindVertexArray(vao);
             GL.Disable(EnableCap.DepthTest);
-	    GL.ActiveTexture(0);
+	        GL.ActiveTexture(0);
             GL.BindTexture(TextureTarget.Texture2D, textureId);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
         }

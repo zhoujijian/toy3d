@@ -6,7 +6,7 @@ namespace Toy3d.Core {
         private Cube cube;
         private Shader shader;
 
-	public Vector3 LocalPosition { get; set; }
+	    public Vector3 LocalPosition { get; set; }
 
         public Light(Vector3 localPosition) {
             LocalPosition = localPosition;
