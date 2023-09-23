@@ -58,7 +58,7 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
         }
 
-        public void Draw(Shader shader) {
+        public void Draw(ShaderInfo shader) {
             var diffuseN = 1;
             var specularN = 1;
             var normalN = 1;
@@ -74,7 +74,7 @@ namespace Toy3d.Core {
                 else if (type == "normal") name = type + normalN++;
                 else if (type == "tangent") name = type + tangentN++;
 
-                GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "material." + name), i);
+                GL.Uniform1(GL.GetUniformLocation(shader.program, "material." + name), i);
                 GL.BindTexture(TextureTarget.Texture2D, textures[i].id);
             }
             GL.ActiveTexture(TextureUnit.Texture0);

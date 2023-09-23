@@ -11,7 +11,7 @@ namespace Toy3d.Samples {
         private int vao;
         private int vbo;
         // private int ebo;
-        private Shader shader;
+        private ShaderInfo shader;
 
         private PerspectiveCamera camera;
         private bool mouseDown = false;
@@ -77,14 +77,14 @@ namespace Toy3d.Samples {
                 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
                 -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
                 -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f          
-	    };
+            };
 
-	    /*
-            var indices = new uint[] { 0, 2, 1 };
-            ebo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
-	    */
+            /*
+                var indices = new uint[] { 0, 2, 1 };
+                ebo = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+                GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
+            */
 
             vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
@@ -99,7 +99,7 @@ namespace Toy3d.Samples {
             GL.EnableVertexAttribArray(2);
             GL.BindVertexArray(0);
 
-            shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+            shader = Shader.Create("Shaders/shader.vert", "Shaders/shader.frag");
 
             var position = new Vector3(0.0f, 2.0f, 3.0f);
             var front = new Vector3(0.0f, 0.0f, -1.0f);
@@ -133,59 +133,59 @@ namespace Toy3d.Samples {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 	    
             GL.BindVertexArray(vao);
-            GL.UseProgram(shader.ProgramId);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uModel"), false, ref model);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uView"), false, ref view);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.ProgramId, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
+            GL.UseProgram(shader.program);
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uView"), false, ref view);
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), false, ref projection);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
 
             // direction light
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "directionLight.direction"), -0.2f, -0.1f, -0.3f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "directionLight.ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "directionLight.diffuse"), 0.4f, 0.4f, 0.4f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "directionLight.specular"), 0.5f, 0.5f, 0.5f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.direction"), -0.2f, -0.1f, -0.3f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.diffuse"), 0.4f, 0.4f, 0.4f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.specular"), 0.5f, 0.5f, 0.5f);
 
             // point light
             var p0 = pointLights[0].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].position"), p0.X, p0.Y, p0.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[0].quadratic"), 0.032f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].position"), p0.X, p0.Y, p0.Z);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].quadratic"), 0.032f);
 
             var p1 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].position"), p1.X, p1.Y, p1.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[1].quadratic"), 0.032f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].position"), p1.X, p1.Y, p1.Z);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].quadratic"), 0.032f);
 
             var p2 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].position"), p2.X, p2.Y, p2.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[2].quadratic"), 0.032f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].position"), p2.X, p2.Y, p2.Z);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].quadratic"), 0.032f);
 
             var p3 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].position"), p3.X, p3.Y, p3.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "pointLights[3].quadratic"), 0.032f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].position"), p3.X, p3.Y, p3.Z);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].quadratic"), 0.032f);
 
             // material
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "material.shininess"), 32.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "material.diffuse"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shader.ProgramId, "material.specular"), 1);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.shininess"), 32.0f);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.diffuse"), 0);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.specular"), 1);
             
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureIdDiffuse);

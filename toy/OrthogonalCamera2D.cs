@@ -20,6 +20,7 @@ namespace Toy3d.Core {
             set { position = value; }
         }
 
+        // https://zhuanlan.zhihu.com/p/474879818
         public Matrix4 ProjectionMatrix {
             get {
                 return Matrix4.CreateOrthographicOffCenter(0, width, height, 0, -1, 1);

@@ -33,13 +33,13 @@ namespace Toy3d.Window
                 Flags = ContextFlags.ForwardCompatible // This is needed to run on macos
             };
 
-            using (var sample = new SampleWindow(GameWindowSettings.Default, nativeWindowSettings)) {
-                sample.Run();
-            }
-
-            // using (var window = new Window(GameWindowSettings.Default, nativeWindowSettings)) {
-            //     window.Run();
+            // using (var sample = new SampleWindow(GameWindowSettings.Default, nativeWindowSettings)) {
+            //     sample.Run();
             // }
+
+            using (var window = new Window(GameWindowSettings.Default, nativeWindowSettings)) {
+                window.Run();
+            }
         }
     }
 }

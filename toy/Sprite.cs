@@ -11,24 +11,24 @@ namespace Toy3d.Core {
         public float[] Vertices { get; private set; }
 
         public Sprite(ImageTexture texture) : this(texture, Color4.White) { }
-	public Sprite(ImageTexture texture, Color4 color) : this(texture, texture.ImageWidth, texture.ImageHeight, color) { }
+	    public Sprite(ImageTexture texture, Color4 color) : this(texture, texture.ImageWidth, texture.ImageHeight, color) { }
         public Sprite(ImageTexture texture, float width, float height, Color4 color) {
-	    this.color = color;
+	        this.color = color;
             this.Texture = texture;
 	    
             var xr = width * 0.5f;
-	    var xl = -xr;
+	        var xl = -xr;
             var yt = height * 0.5f;
-	    var yb = -yt;
+	        var yb = -yt;
 
             Vertices = new float[] {
-		xl, yt, 0.0f, 1.0f,
-		xr, yb, 1.0f, 0.0f,
-		xl, yb, 0.0f, 0.0f,
-		xl, yt, 0.0f, 1.0f,
-		xr, yt, 1.0f, 1.0f,
-		xr, yb, 1.0f, 0.0f
-	    };
+                xl, yt, 0.0f, 1.0f,
+                xr, yb, 1.0f, 0.0f,
+                xl, yb, 0.0f, 0.0f,
+                xl, yt, 0.0f, 1.0f,
+                xr, yt, 1.0f, 1.0f,
+                xr, yb, 1.0f, 0.0f
+            };
 
             VertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);

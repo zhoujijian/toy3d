@@ -5,7 +5,7 @@ namespace Toy3d.Core {
         private int vao;
         private int textureId;
         private int framebufferId;
-        private Shader shader;
+        private ShaderInfo shader;
 
         public bool Chaos { get; set; }
         public bool Confuse { get; set; }
@@ -58,7 +58,7 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
 
 	        // shader
-            shader = new Shader("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
+            shader = Shader.Create("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
 
 	        // You must specify <program> by <GL.ProgramUniform1/2> to set uniform variables here,
 	        // otherwise the uniform variables donot work. Or you can specify it in function <Draw> by call <GL.UseProgram(program)>
@@ -69,7 +69,7 @@ namespace Toy3d.Core {
                 -1, -1, -1
             };
             // glUniform1iv
-            GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "edge_kernel"), edgeKernel.Length, edgeKernel);
+            GL.ProgramUniform1(shader.program, GL.GetUniformLocation(shader.program, "edge_kernel"), edgeKernel.Length, edgeKernel);
 
             float[] blurKernel = {
                 1.0f/16, 2.0f/16, 1.0f/16,
@@ -77,7 +77,7 @@ namespace Toy3d.Core {
                 1.0f/16, 2.0f/16, 1.0f/16
             };
             // glUniform1fv
-            GL.ProgramUniform1(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "blur_kernel"), blurKernel.Length, blurKernel);
+            GL.ProgramUniform1(shader.program, GL.GetUniformLocation(shader.program, "blur_kernel"), blurKernel.Length, blurKernel);
 
             float offset = 1.0f / 300.0f;
             float[] offsets = {
@@ -92,16 +92,16 @@ namespace Toy3d.Core {
                 offset,  -offset
             };
             // glUniform2fv
-            GL.ProgramUniform2(shader.ProgramId, GL.GetUniformLocation(shader.ProgramId, "offsets"), offsets.Length / 2, offsets);
+            GL.ProgramUniform2(shader.program, GL.GetUniformLocation(shader.program, "offsets"), offsets.Length / 2, offsets);
         }
 
 	    public void Draw(float time) {
-            shader.UseProgram();
+            GL.UseProgram(shader.program);
 
-            shader.SetInt("chaos", Chaos ? 1 : 0);
-            shader.SetInt("confuse", Confuse ? 1 : 0);
-            shader.SetInt("shake", Shake ? 1 : 0);
-            shader.SetFloat("time", time);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "chaos"), Chaos ? 1 : 0);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "confuse"), Confuse ? 1 : 0);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "shake"), Shake ? 1 : 0);
+            GL.Uniform1(GL.GetUniformLocation(shader.program, "time"), time);
 
             // System.Diagnostics.Debug.Print($"[PostEffect](Draw)time: {time}, sintime: {System.Math.Sin(time)}, costime: {System.Math.Cos(time)}");
 

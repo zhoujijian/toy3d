@@ -18,7 +18,7 @@ namespace Toy3d.Core {
 
     public class ParticleGenerator {
         private int vao;
-        private Shader shader;
+        private ShaderInfo shader;
         private ImageTexture texture;
         private LinkedList<Particle> particles = new LinkedList<Particle>();
         private Random random = new Random();
@@ -47,7 +47,7 @@ namespace Toy3d.Core {
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
             GL.BindVertexArray(0);
 
-            shader = new Shader("Shaders/particle.vert", "Shaders/particle.frag");
+            shader = Shader.Create("Shaders/particle.vert", "Shaders/particle.frag");
         }
 
         public void DebugUpdate(Vector3 target, float dt) {
@@ -84,16 +84,18 @@ namespace Toy3d.Core {
 	        // BlendFunc enabled on Loading Window
             // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-	        shader.UseProgram();
+            GL.UseProgram(shader.program);
 
             var node = particles.Last;
 	        while (node != null) {
                 var particle = node.Value;
                 node = node.Previous;
 
-                shader.SetVector4("uColor", (Vector4)particle.color);
-                shader.SetMatrix4("uModel", Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(particle.position));
-                shader.SetMatrix4("uProjection", camera.ProjectionMatrix);
+                var model = Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(particle.position);
+                var projection = camera.ProjectionMatrix;
+                GL.Uniform4(GL.GetUniformLocation(shader.program, "uColor"), (Vector4)particle.color);
+                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), true, ref model);
+                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), true, ref projection);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, texture.Handle);
