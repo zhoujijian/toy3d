@@ -9,7 +9,7 @@ namespace Toy3d.Core {
         public Vector2 texcoord;
     };
 
-    public struct Texture {
+    public struct MeshTexture {
         public uint id;
         public string type;
     }
@@ -17,10 +17,10 @@ namespace Toy3d.Core {
     public class Mesh {
         private Vertex[] vertices;
         private uint[] indices;
-        private List<Texture> textures;
+        private List<MeshTexture> textures;
         private int vao, vbo, ebo;
 
-        public Mesh(Vertex[] vertices, uint[] indices, List<Texture> textures) {
+        public Mesh(Vertex[] vertices, uint[] indices, List<MeshTexture> textures) {
             this.vertices = vertices;
             this.indices = indices;
             this.textures = textures;
@@ -58,7 +58,7 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
         }
 
-        public void Draw(ShaderInfo shader) {
+        public void Draw(Shader shader) {
             var diffuseN = 1;
             var specularN = 1;
             var normalN = 1;

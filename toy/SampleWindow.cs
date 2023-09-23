@@ -11,7 +11,7 @@ namespace Toy3d.Samples {
         private int vao;
         private int vbo;
         // private int ebo;
-        private ShaderInfo shader;
+        private Shader shader;
 
         private PerspectiveCamera camera;
         private bool mouseDown = false;
@@ -99,7 +99,7 @@ namespace Toy3d.Samples {
             GL.EnableVertexAttribArray(2);
             GL.BindVertexArray(0);
 
-            shader = Shader.Create("Shaders/shader.vert", "Shaders/shader.frag");
+            shader = Toy3dCore.CreateShader("Shaders/shader.vert", "Shaders/shader.frag");
 
             var position = new Vector3(0.0f, 2.0f, 3.0f);
             var front = new Vector3(0.0f, 0.0f, -1.0f);
@@ -117,8 +117,8 @@ namespace Toy3d.Samples {
                 new Light(new Vector3( 0.0f,  0.0f, -3.0f))
             };
 
-            textureIdDiffuse = ImageTexture.LoadFromFile("Images/container2.png").Handle;
-            textureIdSpecular = ImageTexture.LoadFromFile("Images/container2_specular.png").Handle;
+            textureIdDiffuse = Toy3dCore.CreateTexture("Images/container2.png").id;
+            textureIdSpecular = Toy3dCore.CreateTexture("Images/container2_specular.png").id;
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {

@@ -18,16 +18,16 @@ namespace Toy3d.Core {
 
     public class ParticleGenerator {
         private int vao;
-        private ShaderInfo shader;
-        private ImageTexture texture;
+        private Shader shader;
+        private Texture texture;
         private LinkedList<Particle> particles = new LinkedList<Particle>();
         private Random random = new Random();
 
         public ParticleGenerator() {
-            texture = ImageTexture.LoadFromFile("Images/face.png");
-            var xr = texture.ImageWidth * 0.5f;
+            texture = Toy3dCore.CreateTexture("Images/face.png");
+            var xr = texture.width * 0.5f;
             var xl = -xr;
-            var yt = texture.ImageHeight * 0.5f;
+            var yt = texture.height * 0.5f;
             var yb = -yt;
             var vertices = new float[] {
                 xl, yt, 0.0f, 1.0f,
@@ -47,7 +47,7 @@ namespace Toy3d.Core {
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
             GL.BindVertexArray(0);
 
-            shader = Shader.Create("Shaders/particle.vert", "Shaders/particle.frag");
+            shader = Toy3dCore.CreateShader("Shaders/particle.vert", "Shaders/particle.frag");
         }
 
         public void DebugUpdate(Vector3 target, float dt) {
@@ -98,7 +98,7 @@ namespace Toy3d.Core {
                 GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), true, ref projection);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, texture.Handle);
+                GL.BindTexture(TextureTarget.Texture2D, texture.id);
                 GL.BindVertexArray(vao);
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 GL.BindVertexArray(0);

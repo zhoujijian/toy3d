@@ -10,18 +10,18 @@ namespace Toy3d.Samples {
         }
 
         public void Move(float dt, float windowWidth, float windowHeight) {
-            Transform.position.X += dt * velocity.X;
-            Transform.position.Y += dt * velocity.Y;
+            transform.position.X += dt * velocity.X;
+            transform.position.Y += dt * velocity.Y;
 
-            if (Transform.position.X < 0 || Transform.position.X > windowWidth) {
+            if (transform.position.X < 0 || transform.position.X > windowWidth) {
                 velocity.X *= -1;
-                if (Transform.position.X < 0) { Transform.position.X = 0; }
-                if (Transform.position.X > windowWidth) { Transform.position.X = windowWidth; }
+                if (transform.position.X < 0) { transform.position.X = 0; }
+                if (transform.position.X > windowWidth) { transform.position.X = windowWidth; }
             }
-            if (Transform.position.Y < 0 || Transform.position.Y > windowHeight) {
+            if (transform.position.Y < 0 || transform.position.Y > windowHeight) {
                 velocity.Y *= -1;
-                if (Transform.position.Y < 0) { Transform.position.Y = 0; }
-                if (Transform.position.Y > windowHeight) { Transform.position.Y = windowHeight; }
+                if (transform.position.Y < 0) { transform.position.Y = 0; }
+                if (transform.position.Y > windowHeight) { transform.position.Y = windowHeight; }
             }
         }
     }

@@ -44,7 +44,7 @@ namespace Toy3d.Core {
                 GL.BindVertexArray(0);
             }
 
-            public void Draw(ShaderInfo shader) {
+            public void Draw(Shader shader) {
                 GL.BindVertexArray(vao);
                 GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
                 GL.BindVertexArray(0);

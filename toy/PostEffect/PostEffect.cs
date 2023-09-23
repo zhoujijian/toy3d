@@ -5,7 +5,7 @@ namespace Toy3d.Core {
         private int vao;
         private int textureId;
         private int framebufferId;
-        private ShaderInfo shader;
+        private Shader shader;
 
         public bool Chaos { get; set; }
         public bool Confuse { get; set; }
@@ -58,7 +58,7 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
 
 	        // shader
-            shader = Shader.Create("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
+            shader = Toy3dCore.CreateShader("Shaders/PostEffect/posteffect.vert", "Shaders/PostEffect/posteffect.frag");
 
 	        // You must specify <program> by <GL.ProgramUniform1/2> to set uniform variables here,
 	        // otherwise the uniform variables donot work. Or you can specify it in function <Draw> by call <GL.UseProgram(program)>

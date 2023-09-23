@@ -18,7 +18,7 @@ namespace Toy3d.Core {
 
         private int vao;
         private int vbo;
-        private ShaderInfo shader;
+        private Shader shader;
         private Dictionary<char, Character> characters;
 
         public FontRenderer() {
@@ -63,7 +63,7 @@ namespace Toy3d.Core {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
 
-            shader = Shader.Create("Shaders/font.vert", "Shaders/font.frag");
+            shader = Toy3dCore.CreateShader("Shaders/font.vert", "Shaders/font.frag");
             GL.ProgramUniform1(shader.program, GL.GetUniformLocation(shader.program, "text"), 0);
             GL.ProgramUniform3(shader.program, GL.GetUniformLocation(shader.program, "textColor"), 0.5f, 0.9f, 0.8f);
         }

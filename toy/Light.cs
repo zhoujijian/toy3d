@@ -4,14 +4,14 @@ using OpenTK.Mathematics;
 namespace Toy3d.Core {
     public class Light {
         private Cube cube;
-        private ShaderInfo shader;
+        private Shader shader;
 
 	    public Vector3 LocalPosition { get; set; }
 
         public Light(Vector3 localPosition) {
             LocalPosition = localPosition;
             cube = Primitive.CreateCube();
-            shader = Shader.Create("Shaders/light.vert", "Shaders/light.frag");
+            shader = Toy3dCore.CreateShader("Shaders/light.vert", "Shaders/light.frag");
         }
 
         public void Draw(PerspectiveCamera camera) {

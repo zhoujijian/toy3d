@@ -1,33 +1,79 @@
-﻿using OpenTK.Graphics.OpenGL4;
+using System;
+using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+
+using OpenTK.Graphics.OpenGL4;
 using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
+using System.Numerics;
 
-namespace Toy3d.Core
-{
-    // A helper class, much like Shader, meant to simplify loading textures.
-    public class ImageTexture
-    {
-        public readonly int Handle;
-        public readonly int ImageWidth;
-        public readonly int ImageHeight;
+namespace Toy3d.Core {
+    public struct Shader {
+        public int program;
+    }
 
-        public static ImageTexture LoadFromFile(string path)
-        {
-            // Generate handle
-            int id = GL.GenTexture();
-            int imageWidth, imageHeight;
+    public struct Texture {
+        public int id;
+        public int width;
+        public int height;
+    }
 
-            // Bind the handle
-            GL.BindTexture(TextureTarget.Texture2D, id);
+    public struct Transform {
+        public OpenTK.Mathematics.Vector3 scale;
+        public OpenTK.Mathematics.Vector3 rotation;
+        public OpenTK.Mathematics.Vector3 position;
+    }
 
-            // For this example, we're going to use .NET's built-in System.Drawing library to load textures.
+    public static class Toy3dCore {
+        public static Shader CreateShader(string pathVertex, string pathFragment) {
+            var vertexSource = File.ReadAllText(pathVertex);
+            var vertexShader = GL.CreateShader(ShaderType.VertexShader);
+            GL.ShaderSource(vertexShader, vertexSource);
+            GL.CompileShader(vertexShader);
+            GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out var codeVertexShader);
+            if (codeVertexShader != (int)All.True) {
+                var infoLog = GL.GetShaderInfoLog(vertexShader);
+                throw new Exception($"Error occurred whilst compiling vertex shader({vertexShader}).\n{infoLog}");
+            }
 
-            // Load the image
-            using (var image = new Bitmap(path))
-            {
-                imageWidth = image.Width;
-                imageHeight = image.Height;
+            var fragmentSource = File.ReadAllText(pathFragment);
+            var fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+            GL.ShaderSource(fragmentShader, fragmentSource);
+            GL.CompileShader(fragmentShader);
+            GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out var codeFragmentShader);
+            if (codeFragmentShader != (int)All.True) {
+                var infoLog = GL.GetShaderInfoLog(fragmentShader);
+                throw new Exception($"Error occured whilst compiling fragment shader({fragmentShader}).\n{infoLog}");
+            }
+
+            var info = new Shader();	    
+            info.program = GL.CreateProgram();
+            GL.AttachShader(info.program, vertexShader);
+            GL.AttachShader(info.program, fragmentShader);
+            GL.LinkProgram(info.program);
+            GL.GetProgram(info.program, GetProgramParameterName.LinkStatus, out var code);
+            if (code != (int)All.True) {
+                throw new Exception($"Error occured whilst linking program({info.program})");
+            }
+
+            // When the shader program is linked, it no longer needs the individual shaders attached to it;
+            // the compiled code is copied into the shader program. Detach them, and then delete them.
+            GL.DetachShader(info.program, vertexShader);
+            GL.DetachShader(info.program, fragmentShader);
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
+
+            return info;
+        }
+
+        public static Texture CreateTexture(string path) {
+            Texture info;
+            info.id = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, info.id);
+
+            using (var image = new Bitmap(path)) {
+                info.width = image.Width;
+                info.height = image.Height;
 		
                 // Our Bitmap loads from the top-left pixel, whereas OpenGL loads from the bottom-left, causing the texture to be flipped vertically.
                 // This will correct that, making the texture display properly.
@@ -42,9 +88,7 @@ namespace Toy3d.Core
                 //   Next is the pixel format we want our pixels to be in. In this case, ARGB will suffice.
                 //   We have to fully qualify the name because OpenTK also has an enum named PixelFormat.
                 var data = image.LockBits(
-                    new Rectangle(0, 0, image.Width, image.Height),
-                    ImageLockMode.ReadOnly,
-                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
                 // Now that our pixels are prepared, it's time to generate a texture. We do this with GL.TexImage2D.
                 // Arguments:
@@ -59,8 +103,6 @@ namespace Toy3d.Core
                 //   And finally, the actual pixels.
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             }
-
-            // Now that our texture is loaded, we can set a few settings to affect how the image appears on rendering.
 
             // First, we set the min and mag filter. These are used for when the texture is scaled down and up, respectively.
             // Here, we use Linear for both. This means that OpenGL will try to blend pixels, meaning that textures scaled too far will look blurred.
@@ -84,14 +126,7 @@ namespace Toy3d.Core
             // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            return new ImageTexture(id, imageWidth, imageHeight);
-        }
-
-        public ImageTexture(int glHandle, int imageWidth, int imageHeight)
-        {
-            Handle = glHandle;
-            ImageWidth = imageWidth;
-            ImageHeight = imageHeight;
+            return info;
         }
     }
 }
