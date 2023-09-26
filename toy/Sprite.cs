@@ -2,32 +2,28 @@ using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Toy3d.Core {
-    public class Sprite {
+    public class Sprite {        
+        public readonly Texture texture;
+        public readonly Shader shader;
         public Color4 color = Color4.White;
-        public Transform transform;
 
         private int vao;
-        private int vbo;
-        private Shader shader;
-        private Texture texture;        
+        private int vbo;        
 
-        public Sprite(Texture texture, Shader shader, Color4 color) {	        
+        public Sprite(Texture texture, Shader shader) {
             this.texture = texture;
             this.shader = shader;
-            this.color = color;
-	    
-            var xr = texture.width * 0.5f;
-	        var xl = -xr;
-            var yt = texture.height * 0.5f;
-	        var yb = -yt;
 
+            // 这里是以(0,0)为原点，所在的Model空间坐标系，来设置各点坐标的
+            // 每个点Vertex*Model*View*Projection转换到NDC空间，再根据转换后的坐标对纹理采样
+            // vertex shader中会变换每个顶点，并且传递相应的uv坐标，转换为fragment shader后，依据NDC的顶点坐标与uv坐标的对应关系，对像素点采样
             var vertices = new float[] {
-                xl, yt, 0.0f, 1.0f,
-                xr, yb, 1.0f, 0.0f,
-                xl, yb, 0.0f, 0.0f,
-                xl, yt, 0.0f, 1.0f,
-                xr, yt, 1.0f, 1.0f,
-                xr, yb, 1.0f, 0.0f
+                /*x,y*/0.0f, 1.0f, /*u,v*/0.0f, 1.0f,
+                /*x,y*/1.0f, 0.0f, /*u,v*/1.0f, 0.0f,
+                /*x,y*/0.0f, 0.0f, /*u,v*/0.0f, 0.0f,
+                /*x,y*/1.0f, 0.0f, /*u,v*/1.0f, 0.0f,
+                /*x,y*/0.0f, 1.0f, /*u,v*/0.0f, 1.0f,
+                /*x,y*/1.0f, 1.0f, /*u,v*/1.0f, 1.0f
             };
 
             vbo = GL.GenBuffer();
@@ -41,13 +37,11 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
         }
 
-        public void Draw(Matrix4 matrix, OrthogonalCamera2D camera) {
-            var model = matrix;
-            var projection = camera.ProjectionMatrix;
-
+        public void Draw(Matrix4 model, Matrix4 projection) {
             GL.UseProgram(shader.program);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), true, ref model);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), true, ref projection);
+            // parameter [transpose]: shader中是否使用左乘(转置矩阵), false表示右乘
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), false, ref projection);
             GL.Uniform4(GL.GetUniformLocation(shader.program, "uSpriteColor"), (Vector4)color);
 
             GL.ActiveTexture(TextureUnit.Texture0);

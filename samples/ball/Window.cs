@@ -1,5 +1,4 @@
 ﻿using Toy3d.Core;
-using Toy3d.Samples;
 
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
@@ -7,15 +6,13 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Mathematics;
 
-using System.Collections.Generic;
-
 namespace Toy3d.Window {
     public class Window : GameWindow {
         private OrthogonalCamera2D camera;
         private List<GameObject> gameObjects = new List<GameObject>();
 
         private BallGameObject ball;
-        private ParticleGenerator particleGenerator;
+        private ParticleEmitter particleGenerator;
         private PostEffect shakeScreen;
         private FontRenderer fontRenderer;
         private Shader shader;
@@ -32,7 +29,7 @@ namespace Toy3d.Window {
 
             shader = Toy3dCore.CreateShader("Shaders/sprite.vert", "Shaders/sprite.frag");
             camera = new OrthogonalCamera2D(800, 600, new Vector3(0f, 0f, 1f));
-            particleGenerator = new ParticleGenerator();
+            particleGenerator = new ParticleEmitter();
             shakeScreen = new PostEffect();
 
             fontRenderer = new FontRenderer();
@@ -46,7 +43,7 @@ namespace Toy3d.Window {
         }
 
 	    private void DebugLoadScene() {
-            var sprite = new Sprite(Toy3dCore.CreateTexture("Images/block.png"), shader, Color4.White);
+            var sprite = new Sprite(Toy3dCore.CreateTexture("Images/block.png"), shader);
             var gameObject = new GameObject(sprite);
             gameObject.transform.position = new Vector3(50.0f, 50.0f, 0.0f);
             gameObjects.Add(gameObject);
@@ -55,7 +52,7 @@ namespace Toy3d.Window {
         }
 
 	    private void LoadBall() {
-            var sprite = new Sprite(Toy3dCore.CreateTexture("Images/face.png"), shader, Color4.White);
+            var sprite = new Sprite(Toy3dCore.CreateTexture("Images/face.png"), shader);
             ball = new BallGameObject(sprite, Vector2.One);
             ball.transform.scale = new Vector3(0.1f, 0.1f, 1);
             ball.transform.position = new Vector3(400, 300, 0);
@@ -92,7 +89,7 @@ namespace Toy3d.Window {
                     }
                     var texture = Toy3dCore.CreateTexture(imagePath);
                     var height = texture.height * 0.25f;
-                    var sprite = new Sprite(texture, shader, color);
+                    var sprite = new Sprite(texture, shader);
                     var gameObject = new GameObject(sprite);
                     var x = (c + 0.5f) * width;
                     var y = (r + 0.5f) * height;
@@ -109,7 +106,7 @@ namespace Toy3d.Window {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 	        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             foreach (var gameObject in gameObjects) {
-                gameObject.Draw(camera);
+                // gameObject.Draw(camera);
             }
             particleGenerator.Draw(camera);
             // GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

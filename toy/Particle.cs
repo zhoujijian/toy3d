@@ -16,14 +16,14 @@ namespace Toy3d.Core {
         }
     }
 
-    public class ParticleGenerator {
+    public class ParticleEmitter {
         private int vao;
         private Shader shader;
         private Texture texture;
         private LinkedList<Particle> particles = new LinkedList<Particle>();
         private Random random = new Random();
 
-        public ParticleGenerator() {
+        public ParticleEmitter() {
             texture = Toy3dCore.CreateTexture("Images/face.png");
             var xr = texture.width * 0.5f;
             var xl = -xr;

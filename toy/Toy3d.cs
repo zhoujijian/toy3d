@@ -5,7 +5,6 @@ using System.Drawing.Imaging;
 
 using OpenTK.Graphics.OpenGL4;
 using PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;
-using System.Numerics;
 
 namespace Toy3d.Core {
     public struct Shader {
