@@ -4,16 +4,14 @@ using OpenTK.Graphics.OpenGL4;
 namespace Toy3d.Core {
     public class Sprite {        
         public readonly Texture texture;
-        public readonly Shader shader;
+        public readonly Shader shader;        
         public Color4 color = Color4.White;
+        public Vector2 anchor = Vector2.Zero;
 
-        private int vao;
-        private int vbo;        
+        private static int vao;
+        private static int vbo;
 
-        public Sprite(Texture texture, Shader shader) {
-            this.texture = texture;
-            this.shader = shader;
-
+        public static void CreateVertexObject() {
             // 这里是以(0,0)为原点，所在的Model空间坐标系，来设置各点坐标的
             // 每个点Vertex*Model*View*Projection转换到NDC空间，再根据转换后的坐标对纹理采样
             // vertex shader中会变换每个顶点，并且传递相应的uv坐标，转换为fragment shader后，依据NDC的顶点坐标与uv坐标的对应关系，对像素点采样
@@ -35,6 +33,11 @@ namespace Toy3d.Core {
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
             GL.BindVertexArray(0);
+        }
+
+        public Sprite(Texture texture, Shader shader) {
+            this.texture = texture;
+            this.shader = shader;
         }
 
         public void Draw(Matrix4 model, Matrix4 projection) {

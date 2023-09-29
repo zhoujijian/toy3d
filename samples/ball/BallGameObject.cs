@@ -4,7 +4,8 @@ using OpenTK.Mathematics;
 public class BallGameObject : GameObject {
     private Vector2 velocity;
 
-    public BallGameObject(Sprite sprite, Vector2 velocity) : base(sprite) {
+    public BallGameObject(Sprite sprite, Vector2 velocity) : base() {
+        this.sprite = sprite;
         this.velocity = velocity;
     }
 

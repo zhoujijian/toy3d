@@ -1,43 +1,42 @@
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Toy3d.Core {
     public struct Particle {
+        public Color4 color;        
         public Vector3 position;
-        public Color4 color;
+        public Vector3 velocity;
         public float lifetime;
-
-	    public Particle(Vector3 position, Color4 color, float lifetime) {
-            this.position = position;
-            this.color = color;
-            this.lifetime = lifetime;
-        }
     }
 
     public class ParticleEmitter {
-        private int vao;
+        private static int vao;
+        private static int vbo;
+
         private Shader shader;
         private Texture texture;
-        private LinkedList<Particle> particles = new LinkedList<Particle>();
         private Random random = new Random();
+        private LinkedList<Particle> particles = new LinkedList<Particle>();        
 
-        public ParticleEmitter() {
-            texture = Toy3dCore.CreateTexture("Images/face.png");
-            var xr = texture.width * 0.5f;
-            var xl = -xr;
-            var yt = texture.height * 0.5f;
-            var yb = -yt;
+        public ParticleEmitter(Texture texture, Shader shader) {
+            this.texture = texture;
+            this.shader = shader;
+        }
+
+        public static void CreateVertexObject() {
             var vertices = new float[] {
-                xl, yt, 0.0f, 1.0f,
-                xl, yb, 0.0f, 0.0f,
-                xr, yb, 1.0f, 0.0f,
-                xl, yt, 0.0f, 1.0f,
-                xr, yb, 1.0f, 0.0f,
-                xr, yt, 1.0f, 1.0f
+                -0.5f,  0.5f, /*x,y*/ 0.0f, 1.0f, /*u,v*/
+                 0.5f, -0.5f, /*x,y*/ 1.0f, 0.0f, /*u,v*/
+                -0.5f, -0.5f, /*x,y*/ 0.0f, 0.0f, /*u,v*/
+                 0.5f, -0.5f, /*x,y*/ 1.0f, 0.0f, /*u,v*/
+                -0.5f,  0.5f, /*x,y*/ 0.0f, 1.0f, /*u,v*/
+                 0.5f,  0.5f, /*x,y*/ 1.0f, 1.0f  /*u,v*/
             };
-            var vbo = GL.GenBuffer();
+            
+            vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
 
@@ -46,74 +45,70 @@ namespace Toy3d.Core {
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
             GL.BindVertexArray(0);
-
-            shader = Toy3dCore.CreateShader("Shaders/particle.vert", "Shaders/particle.frag");
         }
 
-        public void DebugUpdate(Vector3 target, float dt) {
-            if (particles.Count <= 0) {
-                var particle = new Particle(target, Color4.White, 100.0f);
-                particles.AddFirst(particle);
-            }
-        }
-
-	    public void Update(Vector3 target, float dt, bool moving) {
+	    public void Update(Vector3 target, float det, bool moving) {
             var node = particles.First;
+
 	        while (node != null) {
-                var next = node.Next;
-                var lifetime = node.Value.lifetime - dt;
-                if (lifetime <= 0.0f) {
-                    particles.Remove(node);
-                } else {
-                    var c = node.Value.color;
-                    var color = new Color4(c.R, c.G, c.B, c.A - dt);
-                    node.Value = new Particle(node.Value.position, color, lifetime);
-                }
-                node = next;
+                var c = node.ValueRef.color;
+                node.ValueRef.lifetime -= det;
+                node.ValueRef.position -= node.ValueRef.velocity * det;
+                node.ValueRef.color = new Color4(c.R, c.G, c.B, c.A - det);
+                node = node.Next;
             }
+
+            particles.Where(x => x.lifetime <= 0).ToList().ForEach(x => particles.Remove(x));
 
             if (moving) {
-                var particle = respawnParticle(target, 10.0f);
-                particles.AddFirst(particle);
+                particles.AddFirst(RespawnParticle(target, 10.0f));
             }
         }
 
-	    public void Draw(OrthogonalCamera2D camera) {
+        public void Draw(Matrix4 model, Matrix4 projection) {
             if (particles.Count <= 0) { return; }
 	    
-	        // BlendFunc enabled on Loading Window
-            // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
+            // GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.UseProgram(shader.program);
 
             var node = particles.Last;
 	        while (node != null) {
-                var particle = node.Value;
-                node = node.Previous;
 
-                var model = Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(particle.position);
-                var projection = camera.ProjectionMatrix;
-                GL.Uniform4(GL.GetUniformLocation(shader.program, "uColor"), (Vector4)particle.color);
-                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), true, ref model);
-                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), true, ref projection);
+                // 1)game object是先进行祖先结点的model运算，再进行当前节点的translate运算的，右乘形式为:
+                //   (Local)Translation * (Ancestor)Model * Rotation * Scale * Vertex
+                // 2)OpenTK创建的矩阵为OpenGL矩阵的转置形式，故运算顺序为R * S * (Ancestor)Model * (Local)T
+                // 3)缩放、旋转运算在祖先结点及当前结算的矩阵运算之前!
+
+                var local = Matrix4.CreateScale(0.05f) * model * Matrix4.CreateTranslation(node.ValueRef.position);
+                GL.Uniform4(GL.GetUniformLocation(shader.program, "uColor"), (Vector4)node.ValueRef.color);
+                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref local);
+                GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), false, ref projection);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, texture.id);
                 GL.BindVertexArray(vao);
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 GL.BindVertexArray(0);
+
+                node = node.Previous;
             }
 
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
 
-	    private Particle respawnParticle(Vector3 target, float lifetime) {
-            // var randOffset = ((random.Next() % 100) - 50) / 20.0f;
-            var randOffset = 0.0f;
+	    private Particle RespawnParticle(Vector3 target, float lifetime) {
+            var rand1 = (random.Next() % 50) - 25;
+            var rand2 = (random.Next() % 50) - 25;
             var r = (float)random.NextDouble();
             var g = (float)random.NextDouble();
             var b = (float)random.NextDouble();
-            return new Particle(target + new Vector3(randOffset, randOffset, 0), new Color4(r, g, b, 1.0f), lifetime);
+            return new Particle {
+                position = target + new Vector3(rand1, rand2, 0),
+                color = new Color4(r, g, b, 1.0f),
+                lifetime = lifetime,
+                velocity = new Vector3(0f, 100.0f, 0f)
+            };
         }
     }
 }

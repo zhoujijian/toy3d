@@ -2,6 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Windowing.Desktop;
+using Toy3d.Core;
 
 namespace Toy3d.Game {
     public class Toy2dWindow : GameWindow {
@@ -16,19 +17,23 @@ namespace Toy3d.Game {
         protected override void OnLoad() {
             base.OnLoad();
 
-            world = new GameWorld2D(800, 600);
+            Sprite.CreateVertexObject();
+            ParticleEmitter.CreateVertexObject();
+
+            // 注意参与运算的width/height要和窗口的Size保持一致，否则会导致变形
+            world = new GameWorld2D(Size.X, Size.Y);
             game.OnLoad(world);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
-            game.OnRenderFrame();
+            game.OnRenderFrame((float)e.Time);
             SwapBuffers();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e) {
-            base.OnUpdateFrame(e);            
-            game.OnUpdateFrame();
+            base.OnUpdateFrame(e);
+            game.OnUpdateFrame((float)e.Time);
             if (KeyboardState.IsKeyDown(Keys.Escape)) {
                 Close();
             }

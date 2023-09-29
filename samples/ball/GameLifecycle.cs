@@ -5,15 +5,20 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 public class GameLifecycle : IGameLifecycle {
-    private Shader shader;
+    private Shader shaderSprite;
+    private Shader shaderParticle;
     private BallGameObject ball;
     private GameWorld2D world;
 
-    public void OnLoad(IGameWorld world)
-    {
-        GL.Enable(EnableCap.Blend);
+    private float intervalLogicFrame = 0f;
 
-        shader = Toy3dCore.CreateShader("Resource/Shaders/sprite.vert", "Resource/Shaders/sprite.frag");
+    private const float GAME_LOGIC_FRAME_INTERVAL = 0.03f;
+
+    public void OnLoad(IGameWorld world) {
+        GL.Enable(EnableCap.Blend);
+        shaderSprite = Toy3dCore.CreateSpriteShader();
+        shaderParticle = Toy3dCore.CreateParticleShader();
+
         this.world = (GameWorld2D)world;
 
         LoadScene();
@@ -22,29 +27,29 @@ public class GameLifecycle : IGameLifecycle {
         // DebugLoadScene();
     }
 
-    public void OnRenderFrame() {
+    public void OnRenderFrame(float elapsed) {
         // GL.BindFramebuffer(FramebufferTarget.Framebuffer, shakeScreen.FramebufferId);
         GL.Clear(ClearBufferMask.ColorBufferBit);
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        world.Draw();
+        world.Draw(elapsed);
     }
 
-    public void OnUpdateFrame() { }
-
-    private void DebugLoadScene() {
-        var sprite = new Sprite(Toy3dCore.CreateTexture("Resource/Images/block.png"), shader);
-        var gameObject = new GameObject(sprite);
-        gameObject.transform.position = new Vector3(50.0f, 50.0f, 0.0f);
-        world.AddGameObject(gameObject);
-
-        // System.Diagnostics.Debug.Print("Model matrix:" + gameObject.transform.ModelMatrix);
+    public void OnUpdateFrame(float elapsed) {
+        intervalLogicFrame += elapsed;
+        while (intervalLogicFrame >= GAME_LOGIC_FRAME_INTERVAL) {
+            world.Update(GAME_LOGIC_FRAME_INTERVAL);
+            intervalLogicFrame -= GAME_LOGIC_FRAME_INTERVAL;
+        }
     }
 
     private void LoadBall() {
-        var sprite = new Sprite(Toy3dCore.CreateTexture("Resource/Images/face.png"), shader);
+        var sprite = new Sprite(Toy3dCore.CreateTexture("Resource/Images/face.png"), shaderSprite);
         ball = new BallGameObject(sprite, Vector2.One);
         ball.transform.scale = new Vector3(sprite.texture.width, sprite.texture.height, 1);
+        // ball.transform.rotation = new Vector3(0, 0, 1f);
         ball.transform.position = new Vector3(400, 300, 0);
+        ball.emitter = new ParticleEmitter(Toy3dCore.CreateTexture("Resource/Images/face.png"), shaderParticle);
+
         world.AddGameObject(ball);
     }
 
@@ -73,17 +78,20 @@ public class GameLifecycle : IGameLifecycle {
                         default: color = Color4.White; break;
                     }
                     imagePath = "Resource/Images/block.png";
-                }
+                }                
+
+                var block = new GameObject();
+                var w = world.width / 8;
+                var h = w * 0.5f;
+                // gameObject.transform.scale = new Vector3(sprite.texture.width, sprite.texture.height, 1);
+                block.transform.scale = new Vector3(w, h, 1);
+                block.transform.position = new Vector3(c * w, r * h, 0.0f);
 
                 var texture = Toy3dCore.CreateTexture(imagePath);
-                var sprite = new Sprite(texture, shader);
-                sprite.color = color;
-                var gameObject = new GameObject(sprite);
-                var x = (c + 0.5f) * world.width / 8;
-                var y = (r + 0.5f) * world.height / 8;
-                gameObject.transform.scale = new Vector3(sprite.texture.width, sprite.texture.height, 1);
-                gameObject.transform.position = new Vector3(x, y, 0.0f);
-                world.AddGameObject(gameObject);
+                block.sprite = new Sprite(texture, shaderSprite);
+                block.sprite.color = color;
+
+                world.AddGameObject(block);
             }
         }
     }
