@@ -14,6 +14,7 @@ namespace Toy3d.Core {
         public int id;
         public int width;
         public int height;
+        public string type;
     }
 
     public struct Transform {
@@ -152,7 +153,7 @@ namespace Toy3d.Core {
         }
 
         public static Texture CreateTexture(string path) {
-            Texture info;
+            Texture info = new Texture();
             info.id = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, info.id);
 

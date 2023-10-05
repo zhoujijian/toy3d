@@ -7,24 +7,21 @@ using OpenTK.Mathematics;
 using Toy3d.Core;
 
 namespace Toy3d.Samples {
+    struct Material {
+        public Shader shader;
+        public int vao;
+        public int textureId1;
+        public int textureId2;
+    }
+
     public class SampleWindow : GameWindow {
-        private int vao;
-        private int vbo;
-        // private int ebo;
-        private Shader shader;
-
+        private Material material;
         private PerspectiveCamera camera;
-        private bool mouseDown = false;
-        private float wheelOffsetY;
-        private bool firstWheel = true;
-
-        // private Light light;
         private Light[] pointLights;
-        private int textureIdDiffuse;
-        private int textureIdSpecular;
 
-        private const float YAW = -90f;
-        private const float PITCH = 0f;
+        private bool mouseDown = false;
+        private float wheelY;
+        private bool wheelFirst = true;        
 
         public SampleWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings) { }
@@ -32,11 +29,15 @@ namespace Toy3d.Samples {
         protected override void OnLoad() {
             base.OnLoad();
 
-            vao = GL.GenVertexArray();
+            AddCube();
+            AddCamera();
+            AddLights();
+        }
 
+        private void AddCube() {
 	        var vertices = new float[] {
-                // positions          // normals           // texture coords
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+                // xyz               // normals           // uv
+                -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -79,18 +80,13 @@ namespace Toy3d.Samples {
                 -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f          
             };
 
-            /*
-                var indices = new uint[] { 0, 2, 1 };
-                ebo = GL.GenBuffer();
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-                GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
-            */
+            material.vao = GL.GenVertexArray();
 
-            vbo = GL.GenBuffer();
+            var vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
 
-            GL.BindVertexArray(vao);
+            GL.BindVertexArray(material.vao);
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
@@ -99,26 +95,34 @@ namespace Toy3d.Samples {
             GL.EnableVertexAttribArray(2);
             GL.BindVertexArray(0);
 
-            shader = Toy3dCore.CreateShader("Shaders/shader.vert", "Shaders/shader.frag");
+            var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
+            var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
+            material.shader = Toy3dCore.CreateShader(vertex, fragment);
+            material.textureId1 = Toy3dCore.CreateTexture("Resource/Images/container2.png").id;
+            material.textureId2 = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png").id;
+        }
 
+        private void AddCamera() {
             var position = new Vector3(0.0f, 2.0f, 3.0f);
-            var front = new Vector3(0.0f, 0.0f, -1.0f);
+            var front = new Vector3(0.0f, 0f, -1.0f);
             var up = new Vector3(0.0f, 1.0f, 0.0f);
-            camera = new PerspectiveCamera(position, front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
-            camera.Yaw = YAW;
-            camera.Pitch = PITCH;
-
-            // light = new Light(new Vector3(0.0f, 1.0f, -1.0f));
-            
-            pointLights = new Light[] {
-                new Light(new Vector3( 0.7f,  0.2f,  2.0f)),
-                new Light(new Vector3( 2.3f, -3.3f, -4.0f)),
-                new Light(new Vector3(-4.0f,  2.0f, -12.0f)),
-                new Light(new Vector3( 0.0f,  0.0f, -3.0f))
+            camera = new PerspectiveCamera(position, front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f) {
+                Yaw = -90f,
+                Pitch = -45f
             };
+            ResetCameraFront();
+        }
 
-            textureIdDiffuse = Toy3dCore.CreateTexture("Images/container2.png").id;
-            textureIdSpecular = Toy3dCore.CreateTexture("Images/container2_specular.png").id;
+        private void AddLights() {
+            var vertex = File.ReadAllText("Resource/Shaders/light.vert");
+            var fragment = File.ReadAllText("Resource/Shaders/light.frag");
+            var shader = Toy3dCore.CreateShader(vertex, fragment);
+            pointLights = new Light[] {
+                new Light(shader, new Vector3( 0.7f,  0.2f,  2.0f)),
+                new Light(shader, new Vector3( 2.3f, -3.3f, -4.0f)),
+                new Light(shader, new Vector3(-4.0f,  2.0f, -12.0f)),
+                new Light(shader, new Vector3( 0.0f,  0.0f, -3.0f))
+            };
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {
@@ -126,77 +130,78 @@ namespace Toy3d.Samples {
 
             var model = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
             var view = camera.ViewMatrix;
-            var projection = camera.ProjectionMatrix;
+            var projection = camera.ProjectionMatrix;            
 
             // GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 	    
-            GL.BindVertexArray(vao);
-            GL.UseProgram(shader.program);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uView"), false, ref view);
-            GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
+            GL.BindVertexArray(material.vao);
+
+            var program = material.shader.program;
+            GL.UseProgram(program);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
+            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
 
             // direction light
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.direction"), -0.2f, -0.1f, -0.3f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.diffuse"), 0.4f, 0.4f, 0.4f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "directionLight.specular"), 0.5f, 0.5f, 0.5f);
+            GL.Uniform3(GL.GetUniformLocation(program, "directionLight.direction"), -0.2f, -0.1f, -0.3f);
+            GL.Uniform3(GL.GetUniformLocation(program, "directionLight.ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(program, "directionLight.diffuse"), 0.4f, 0.4f, 0.4f);
+            GL.Uniform3(GL.GetUniformLocation(program, "directionLight.specular"), 0.5f, 0.5f, 0.5f);
 
             // point light
-            var p0 = pointLights[0].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].position"), p0.X, p0.Y, p0.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[0].quadratic"), 0.032f);
+            var p0 = pointLights[0].Position;
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].position"), p0.X, p0.Y, p0.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[0].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[0].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[0].quadratic"), 0.032f);
 
-            var p1 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].position"), p1.X, p1.Y, p1.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[1].quadratic"), 0.032f);
+            var p1 = pointLights[1].Position;
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].position"), p1.X, p1.Y, p1.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[1].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[1].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[1].quadratic"), 0.032f);
 
-            var p2 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].position"), p2.X, p2.Y, p2.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[2].quadratic"), 0.032f);
+            var p2 = pointLights[1].Position;
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].position"), p2.X, p2.Y, p2.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[2].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[2].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[2].quadratic"), 0.032f);
 
-            var p3 = pointLights[1].LocalPosition;
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].position"), p3.X, p3.Y, p3.Z);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
-            GL.Uniform3(GL.GetUniformLocation(shader.program, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].constant"), 1.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].linear"), 0.09f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "pointLights[3].quadratic"), 0.032f);
+            var p3 = pointLights[1].Position;
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].position"), p3.X, p3.Y, p3.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
+            GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[3].constant"), 1.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[3].linear"), 0.09f);
+            GL.Uniform1(GL.GetUniformLocation(program, "pointLights[3].quadratic"), 0.032f);
 
             // material
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.shininess"), 32.0f);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.diffuse"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shader.program, "material.specular"), 1);
+            GL.Uniform1(GL.GetUniformLocation(program, "material.shininess"), 32.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
+            GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);
             
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, textureIdDiffuse);
+            GL.BindTexture(TextureTarget.Texture2D, material.textureId1);
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, textureIdSpecular);
+            GL.BindTexture(TextureTarget.Texture2D, material.textureId2);
 
-            // GL.DrawElements(PrimitiveType.Triangles, 3, DrawElementsType.UnsignedInt, 0);
+            // GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedInt, 0);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
             GL.BindVertexArray(0);
 
-            // light.Draw(camera);
             foreach (var light in pointLights) {
                 light.Draw(camera);
             }
@@ -220,10 +225,10 @@ namespace Toy3d.Samples {
                 camera.Position = camera.Position - cameraSpeed * camera.Front;
             }
 	        else if (KeyboardState.IsKeyDown(Keys.A)) {
-                camera.Position = camera.Position - cameraSpeed * (Vector3.Cross(camera.Front, camera.Up));
+                camera.Position = camera.Position - cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
             }
 	        else if (KeyboardState.IsKeyDown(Keys.D)) {
-                camera.Position = camera.Position + cameraSpeed * (Vector3.Cross(camera.Front, camera.Up));
+                camera.Position = camera.Position + cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
             }
         }
 
@@ -240,8 +245,11 @@ namespace Toy3d.Samples {
             camera.Yaw = camera.Yaw + e.DeltaX * camera.Sensitivity;
             camera.Pitch = camera.Pitch + (-e.DeltaY) * camera.Sensitivity;
             if (camera.Pitch >  89.0f) { camera.Pitch =  89.0f; }
-            if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }
-	    
+            if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }            
+            ResetCameraFront();
+        }
+
+        private void ResetCameraFront() {
             // 按照pitch俯仰角计算y分量及在xz平面的投影 => 按照yaw偏航角计算xz平面的投影的x/z值
             var radYaw = MathHelper.DegreesToRadians(camera.Yaw);
             var radPitch = MathHelper.DegreesToRadians(camera.Pitch);
@@ -259,16 +267,16 @@ namespace Toy3d.Samples {
         protected override void OnMouseWheel(MouseWheelEventArgs e) {
             base.OnMouseWheel(e);
 
-            if (firstWheel) {
-                firstWheel = false;
-                wheelOffsetY = e.OffsetY;
+            if (wheelFirst) {
+                wheelFirst = false;
+                wheelY = e.OffsetY;
                 return;
             }
 
-            camera.Fov = camera.Fov + e.OffsetY - wheelOffsetY;
+            camera.Fov = camera.Fov + e.OffsetY - wheelY;
             if (camera.Fov < 1.0f)   { camera.Fov = 1.0f; }
             if (camera.Fov > 120.0f) { camera.Fov = 120.0f; }
-            wheelOffsetY = e.OffsetY;
+            wheelY = e.OffsetY;
         }
 
         protected override void OnResize(ResizeEventArgs e) {

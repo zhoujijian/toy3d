@@ -5,18 +5,19 @@ namespace Toy3d.Core {
     public class Light {
         private Cube cube;
         private Shader shader;
+        private Vector3 position;
 
-	    public Vector3 LocalPosition { get; set; }
+	    public Vector3 Position => position;
 
-        public Light(Vector3 localPosition) {
-            LocalPosition = localPosition;
+        public Light(Shader shader, Vector3 position) {
+            this.shader = shader;
+            this.position = position;
             cube = Primitive.CreateCube();
-            shader = Toy3dCore.CreateShader("Shaders/light.vert", "Shaders/light.frag");
         }
 
         public void Draw(PerspectiveCamera camera) {
             GL.UseProgram(shader.program);
-            var model = Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(LocalPosition);
+            var model = Matrix4.CreateScale(0.1f) * Matrix4.CreateTranslation(position);
             var view = camera.ViewMatrix;
             var projection = camera.ProjectionMatrix;
             GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);

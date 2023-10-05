@@ -13,7 +13,7 @@ namespace Toy3d.Core {
 
         public static void CreateVertexObject() {
             // 这里是以(0,0)为原点，所在的Model空间坐标系，来设置各点坐标的
-            // 每个点Vertex*Model*View*Projection转换到NDC空间，再根据转换后的坐标对纹理采样
+            // 每个点Projection*View*Model*Vertex(右乘)转换到NDC空间，再根据转换后的坐标对纹理采样
             // vertex shader中会变换每个顶点，并且传递相应的uv坐标，转换为fragment shader后，依据NDC的顶点坐标与uv坐标的对应关系，对像素点采样
             var vertices = new float[] {
                 /*x,y*/0.0f, 1.0f, /*u,v*/0.0f, 1.0f,
