@@ -7,7 +7,7 @@ using OpenTK.Mathematics;
 public class GameLifecycle : IGameLifecycle {
     private Shader shaderSprite;
     private Shader shaderParticle;
-    private BallGameObject ball;
+    private BallSprite ball;
     private GameWorld2D world;
 
     private float intervalLogicFrame = 0f;
@@ -43,9 +43,8 @@ public class GameLifecycle : IGameLifecycle {
     }
 
     private void LoadBall() {
-        var sprite = new Sprite(Toy3dCore.CreateTexture("Resource/Images/face.png"), shaderSprite);
-        ball = new BallGameObject(sprite, Vector2.One);
-        ball.transform.scale = new Vector3(sprite.texture.width, sprite.texture.height, 1);
+        ball = new BallSprite(Toy3dCore.CreateTexture("Resource/Images/face.png"), shaderSprite, Vector2.One);
+        ball.transform.scale = new Vector3(ball.texture.width, ball.texture.height, 1);
         // ball.transform.rotation = new Vector3(0, 0, 1f);
         ball.transform.position = new Vector3(400, 300, 0);
         ball.emitter = new ParticleEmitter(Toy3dCore.CreateTexture("Resource/Images/face.png"), shaderParticle);
@@ -80,16 +79,14 @@ public class GameLifecycle : IGameLifecycle {
                     imagePath = "Resource/Images/block.png";
                 }                
 
-                var block = new GameObject();
+                var texture = Toy3dCore.CreateTexture(imagePath);
+                var block = new Sprite(texture, shaderSprite);
                 var w = world.width / 8;
                 var h = w * 0.5f;
                 // gameObject.transform.scale = new Vector3(sprite.texture.width, sprite.texture.height, 1);
                 block.transform.scale = new Vector3(w, h, 1);
                 block.transform.position = new Vector3(c * w, r * h, 0.0f);
-
-                var texture = Toy3dCore.CreateTexture(imagePath);
-                block.sprite = new Sprite(texture, shaderSprite);
-                block.sprite.color = color;
+                block.additive = color;
 
                 world.AddGameObject(block);
             }

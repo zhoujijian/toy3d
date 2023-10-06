@@ -16,7 +16,7 @@ namespace Toy3d.Samples {
 
     public class SampleWindow : GameWindow {
         private Material material;
-        private PerspectiveCamera camera;
+        private Camera camera;
         private Light[] pointLights;
 
         private bool mouseDown = false;
@@ -103,14 +103,14 @@ namespace Toy3d.Samples {
         }
 
         private void AddCamera() {
-            var position = new Vector3(0.0f, 2.0f, 3.0f);
             var front = new Vector3(0.0f, 0f, -1.0f);
             var up = new Vector3(0.0f, 1.0f, 0.0f);
-            camera = new PerspectiveCamera(position, front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f) {
-                Yaw = -90f,
-                Pitch = -45f
-            };
-            ResetCameraFront();
+            camera = new Camera(front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
+            camera.transform.position = new Vector3(0.0f, 2.0f, 3.0f);
+
+            camera.Yaw = -90f;
+            camera.Pitch = -45f;
+            camera.ResetFront();
         }
 
         private void AddLights() {
@@ -118,11 +118,15 @@ namespace Toy3d.Samples {
             var fragment = File.ReadAllText("Resource/Shaders/light.frag");
             var shader = Toy3dCore.CreateShader(vertex, fragment);
             pointLights = new Light[] {
-                new Light(shader, new Vector3( 0.7f,  0.2f,  2.0f)),
-                new Light(shader, new Vector3( 2.3f, -3.3f, -4.0f)),
-                new Light(shader, new Vector3(-4.0f,  2.0f, -12.0f)),
-                new Light(shader, new Vector3( 0.0f,  0.0f, -3.0f))
+                new Light(LightType.Point, shader),
+                new Light(LightType.Point, shader),
+                new Light(LightType.Point, shader),
+                new Light(LightType.Point, shader)
             };
+            pointLights[0].transform.position = new Vector3( 0.7f,  0.2f,  2.0f);
+            pointLights[1].transform.position = new Vector3( 2.3f, -3.3f, -4.0f);
+            pointLights[2].transform.position = new Vector3(-4.0f,  2.0f, -12.0f);
+            pointLights[3].transform.position = new Vector3( 0.0f,  0.0f, -3.0f);
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {
@@ -143,7 +147,7 @@ namespace Toy3d.Samples {
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.Position.X, camera.Position.Y, camera.Position.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.transform.position.X, camera.transform.position.Y, camera.transform.position.Z);
 
             // direction light
             GL.Uniform3(GL.GetUniformLocation(program, "directionLight.direction"), -0.2f, -0.1f, -0.3f);
@@ -152,7 +156,7 @@ namespace Toy3d.Samples {
             GL.Uniform3(GL.GetUniformLocation(program, "directionLight.specular"), 0.5f, 0.5f, 0.5f);
 
             // point light
-            var p0 = pointLights[0].Position;
+            var p0 = pointLights[0].transform.position;
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].position"), p0.X, p0.Y, p0.Z);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
@@ -161,7 +165,7 @@ namespace Toy3d.Samples {
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[0].linear"), 0.09f);
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[0].quadratic"), 0.032f);
 
-            var p1 = pointLights[1].Position;
+            var p1 = pointLights[1].transform.position;
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].position"), p1.X, p1.Y, p1.Z);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
@@ -170,7 +174,7 @@ namespace Toy3d.Samples {
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[1].linear"), 0.09f);
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[1].quadratic"), 0.032f);
 
-            var p2 = pointLights[1].Position;
+            var p2 = pointLights[2].transform.position;
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].position"), p2.X, p2.Y, p2.Z);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
@@ -179,7 +183,7 @@ namespace Toy3d.Samples {
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[2].linear"), 0.09f);
             GL.Uniform1(GL.GetUniformLocation(program, "pointLights[2].quadratic"), 0.032f);
 
-            var p3 = pointLights[1].Position;
+            var p3 = pointLights[3].transform.position;
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].position"), p3.X, p3.Y, p3.Z);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
             GL.Uniform3(GL.GetUniformLocation(program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
@@ -219,16 +223,16 @@ namespace Toy3d.Samples {
 
             var cameraSpeed = 2.5f * (float)args.Time;
             if (KeyboardState.IsKeyDown(Keys.W)) {
-                camera.Position = camera.Position + cameraSpeed * camera.Front;
+                camera.transform.position += cameraSpeed * camera.Front;
             }
 	        else if (KeyboardState.IsKeyDown(Keys.S)) {
-                camera.Position = camera.Position - cameraSpeed * camera.Front;
+                camera.transform.position -= cameraSpeed * camera.Front;
             }
 	        else if (KeyboardState.IsKeyDown(Keys.A)) {
-                camera.Position = camera.Position - cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
+                camera.transform.position -= cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
             }
 	        else if (KeyboardState.IsKeyDown(Keys.D)) {
-                camera.Position = camera.Position + cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
+                camera.transform.position += cameraSpeed * Vector3.Cross(camera.Front, camera.Up);
             }
         }
 
@@ -246,17 +250,8 @@ namespace Toy3d.Samples {
             camera.Pitch = camera.Pitch + (-e.DeltaY) * camera.Sensitivity;
             if (camera.Pitch >  89.0f) { camera.Pitch =  89.0f; }
             if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }            
-            ResetCameraFront();
-        }
 
-        private void ResetCameraFront() {
-            // 按照pitch俯仰角计算y分量及在xz平面的投影 => 按照yaw偏航角计算xz平面的投影的x/z值
-            var radYaw = MathHelper.DegreesToRadians(camera.Yaw);
-            var radPitch = MathHelper.DegreesToRadians(camera.Pitch);
-            var frontx = MathHelper.Cos(radPitch) * MathHelper.Cos(radYaw);
-            var fronty = MathHelper.Sin(radPitch);
-            var frontz = MathHelper.Cos(radPitch) * MathHelper.Sin(radYaw);
-            camera.Front = Vector3.Normalize(new Vector3((float)frontx, (float)fronty, (float)frontz));
+            camera.ResetFront();
         }
 
         protected override void OnMouseUp(MouseButtonEventArgs e) {

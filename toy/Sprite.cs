@@ -2,10 +2,11 @@ using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Toy3d.Core {
-    public class Sprite {        
+    public class Sprite: GameObject {        
         public readonly Texture texture;
-        public readonly Shader shader;        
-        public Color4 color = Color4.White;
+        public readonly Shader shader;
+
+        public Color4 additive = Color4.White;
         public Vector2 anchor = Vector2.Zero;
 
         private static int vao;
@@ -40,12 +41,13 @@ namespace Toy3d.Core {
             this.shader = shader;
         }
 
-        public void Draw(Matrix4 model, Matrix4 projection) {
+        public override void Draw(Matrix4 projection) {
+            var model = GetModelMatrix();
             GL.UseProgram(shader.program);
             // parameter [transpose]: shader中是否使用左乘(转置矩阵), false表示右乘
             GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uProjection"), false, ref projection);
-            GL.Uniform4(GL.GetUniformLocation(shader.program, "uSpriteColor"), (Vector4)color);
+            GL.Uniform4(GL.GetUniformLocation(shader.program, "uSpriteColor"), (Vector4)additive);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, texture.id);

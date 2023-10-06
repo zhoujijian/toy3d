@@ -1,11 +1,10 @@
 using Toy3d.Core;
 using OpenTK.Mathematics;
 
-public class BallGameObject : GameObject {
+public class BallSprite : Sprite {
     private Vector2 velocity;
 
-    public BallGameObject(Sprite sprite, Vector2 velocity) : base() {
-        this.sprite = sprite;
+    public BallSprite(Texture texture, Shader shader, Vector2 velocity) : base(texture, shader) {
         this.velocity = velocity;
     }
 
