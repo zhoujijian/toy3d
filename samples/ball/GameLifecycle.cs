@@ -77,7 +77,7 @@ public class GameLifecycle : IGameLifecycle {
                         default: color = Color4.White; break;
                     }
                     imagePath = "Resource/Images/block.png";
-                }                
+                }
 
                 var texture = Toy3dCore.CreateTexture(imagePath);
                 var block = new Sprite(texture, shaderSprite);

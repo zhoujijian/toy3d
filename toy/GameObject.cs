@@ -1,16 +1,36 @@
+using System.Collections.Generic;
 using OpenTK.Mathematics;
 
 namespace Toy3d.Core {
     public class GameObject {
+        private GameObject parent;
+        private readonly List<GameObject> children = new List<GameObject>();
+
         public Transform transform;
         public ParticleEmitter emitter;
+
+        public GameObject Parent {
+            get { return parent; }
+            set {
+                if (parent != null) {
+                    parent.children.Remove(this);
+                }
+                parent = value;
+                parent.children.Add(this);
+            }
+        }
 
         public GameObject() {
             transform.scale = Vector3.One;
         }
 
         public virtual void Draw(Matrix4 projection) { }
+
         public virtual void Draw(Camera camera) { }
+
+        public ICollection<GameObject> GetChildren() {
+            return children;
+        }
 
         public void Update(float elapsed) {
             emitter?.Update(Vector3.Zero, elapsed, true);
