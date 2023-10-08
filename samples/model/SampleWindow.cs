@@ -7,22 +7,16 @@ using OpenTK.Mathematics;
 using Toy3d.Core;
 
 namespace Toy3d.Samples {
-    struct Material {
-        public Shader shader;
-        public int vao;
-        public int textureId1;
-        public int textureId2;
-    }
-
     public class SampleWindow : GameWindow {
         private Material material;
         private Camera camera;
         private Light[] pointLights;
         private Light directionLight;
+        private uint[] indices;
 
         private bool mouseDown = false;
         private float wheelY;
-        private bool wheelFirst = true;        
+        private bool wheelFirst = true;
 
         public SampleWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings) { }
@@ -38,17 +32,17 @@ namespace Toy3d.Samples {
         private void AddCube() {
 	        var vertices = new float[] {
                 // xyz               // normals           // uv
-                -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-                0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,                
                 -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
 
                 -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-                0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
                 -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
                 -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
@@ -59,26 +53,39 @@ namespace Toy3d.Samples {
                 -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
                 -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-                0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
                 -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-                0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-                0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
                 -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
                 -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
                 -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-                0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-                0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
                 -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
                 -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f          
+            };
+
+            // 只使用8个顶点的数据，然后使用索引绘制是不足够的
+            //   顶点绑定的UV坐标，在绘制更多面时，因为UV坐标不能合理对应，不能正确采样
+            // => 这里使用冗余的全顶点数据
+
+            indices = new uint[] {
+                0, 1, 2, 3, 4, 5,
+                6, 7, 8, 9, 10, 11,
+                12, 13, 14, 15, 16, 17,
+                20, 19, 18, 23, 22, 21,
+                24, 25, 26, 27, 28, 29,
+                32, 31, 30, 35, 34, 33
             };
 
             material.vao = GL.GenVertexArray();
@@ -94,13 +101,20 @@ namespace Toy3d.Samples {
             GL.EnableVertexAttribArray(1);
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
             GL.EnableVertexAttribArray(2);
+
+            var ebo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
+
             GL.BindVertexArray(0);
 
             var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
             var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
             material.shader = Toy3dCore.CreateShader(vertex, fragment);
-            material.textureId1 = Toy3dCore.CreateTexture("Resource/Images/container2.png").id;
-            material.textureId2 = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png").id;
+            material.diffuse = Toy3dCore.CreateTexture("Resource/Images/container2.png");
+            material.specular = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png");
+
+            material.shininess = 32f;
         }
 
         private void AddCamera() {
@@ -177,17 +191,23 @@ namespace Toy3d.Samples {
         protected override void OnRenderFrame(FrameEventArgs args) {
             base.OnRenderFrame(args);
 
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            DrawDirect();
+
+            SwapBuffers();
+        }
+
+        private void DrawDirect() {
+            GL.BindVertexArray(material.vao);
+
+            var program = material.shader.program;
             var model = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
             var view = camera.ViewMatrix;
             var projection = camera.ProjectionMatrix;
 
-            // GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.DepthTest);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-	    
-            GL.BindVertexArray(material.vao);
-
-            var program = material.shader.program;
             GL.UseProgram(program);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
@@ -200,23 +220,21 @@ namespace Toy3d.Samples {
             }
 
             // material
-            GL.Uniform1(GL.GetUniformLocation(program, "material.shininess"), 32.0f);
+            GL.Uniform1(GL.GetUniformLocation(program, "material.shininess"), material.shininess);
             GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
             GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);
             
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, material.textureId1);
+            GL.BindTexture(TextureTarget.Texture2D, material.diffuse.id);
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, material.textureId2);
+            GL.BindTexture(TextureTarget.Texture2D, material.specular.id);
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            GL.DrawElements(BeginMode.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
 
             foreach (var light in pointLights) {
                 light.Draw(camera);
-            }
-
-            SwapBuffers();
+            }            
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args) {

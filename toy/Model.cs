@@ -1,25 +1,15 @@
-using Assimp;
-using Assimp.Unmanaged;
-
 namespace Toy3d.Core {
-    public class Model {
+    public class Model: GameObject {
         private Mesh[] meshes;
 
-        public void Draw() {
-
+        public Model(Mesh[] meshes) {
+            this.meshes = meshes;
         }
 
-        private void ProcessNode(Scene scene, Node node) {
-            for (var i=0; i<node.MeshCount; ++i) {
-                ProcessMesh(scene.Meshes[node.MeshIndices[i]]);
+        public override void Draw(Camera camera) {
+            foreach (var mesh in meshes) {
+                mesh.Draw(camera);
             }
-            for (var i=0; i<node.ChildCount; ++i) {
-                ProcessNode(scene, node.Children[i]);
-            }
-        }
-
-        private void ProcessMesh(Assimp.Mesh mesh) {
-
         }
     }
 }
