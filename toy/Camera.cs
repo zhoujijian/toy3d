@@ -1,7 +1,7 @@
 using OpenTK.Mathematics;
 
 namespace Toy3d.Core {
-    public class Camera: GameObject {
+    public class Camera {
         private Vector3 up;
         private Vector3 front;
 
@@ -17,6 +17,8 @@ namespace Toy3d.Core {
         public readonly float far;
         public readonly float aspectRatio;
 
+        public Vector3 position;
+
         public Camera(Vector3 front, Vector3 up, float sensitivity, float near, float far, float aspectRatio, float fov) {
             this.front = front;
             this.up = up;
@@ -31,7 +33,7 @@ namespace Toy3d.Core {
         public Matrix4 ViewMatrix {
             // LookAt => 平移矩阵*旋转矩阵
             // TODO: 由父节点计算出世界空间position
-            get { return Matrix4.LookAt(transform.position, transform.position + Front, Up); }
+            get { return Matrix4.LookAt(position, position + Front, Up); }
         }
 
         public Matrix4 ProjectionMatrix {

@@ -19,7 +19,6 @@ namespace Toy3d.Core {
     }
 
     public class Mesh {
-        private Vertex[] vertices;
         private uint[] indices;
         private List<Texture> textures;
         private Material material;
@@ -27,35 +26,23 @@ namespace Toy3d.Core {
 
         public readonly Transform transform;
 
-        public Mesh(Vertex[] vertices, uint[] indices, List<Texture> textures) {
-            this.vertices = vertices;
+        public Mesh(Model parent, float[] vertices, uint[] indices, List<Texture> textures) {
+            this.parent = parent;
             this.indices = indices;
             this.textures = textures;
-
-            var ELEMENTS = 8;
-            var datas = new float[vertices.Length * ELEMENTS];
-            foreach (var vertex in vertices) {
-                datas.Append(vertex.position.X);
-                datas.Append(vertex.position.Y);
-                datas.Append(vertex.position.Z);
-                datas.Append(vertex.normal.X);
-                datas.Append(vertex.normal.Y);
-                datas.Append(vertex.normal.Z);
-                datas.Append(vertex.texcoord.X);
-                datas.Append(vertex.texcoord.Y);
-            }
             
             material.vao = GL.GenVertexArray();
             GL.BindVertexArray(material.vao);
 
             var vbo = GL.GenBuffer();            
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, datas.Length * sizeof(float), datas, BufferUsageHint.StaticDraw);            
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);            
 
             var ebo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
             GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
         
+            var ELEMENTS = 8;
             var stride = ELEMENTS * sizeof(float);
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
             GL.EnableVertexAttribArray(0);
@@ -78,7 +65,7 @@ namespace Toy3d.Core {
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.transform.position.X, camera.transform.position.Y, camera.transform.position.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.position.X, camera.position.Y, camera.position.Z);
             // material
             GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
             GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);
