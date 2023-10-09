@@ -8,11 +8,10 @@ using Toy3d.Core;
 
 namespace Toy3d.Samples {
     public class SampleWindow : GameWindow {
-        private Material material;
+        private Shader shaderBox;
         private Camera camera;
         private Light[] pointLights;
         private Light directionLight;
-        private uint[] indices;
         private Model box;
 
         private bool mouseDown = false;
@@ -89,37 +88,20 @@ namespace Toy3d.Samples {
                 32, 31, 30, 35, 34, 33
             };
 
-            // var mesh = new Mesh(vertices, indices, null);
-
-            Material material;
-
-            material.vao = GL.GenVertexArray();
-
-            var vbo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
-
-            GL.BindVertexArray(material.vao);
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
-            GL.EnableVertexAttribArray(1);
-            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
-            GL.EnableVertexAttribArray(2);
-
-            var ebo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(uint) * indices.Length, indices, BufferUsageHint.StaticDraw);
-
-            GL.BindVertexArray(0);
-
             var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
             var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
-            material.shader = Toy3dCore.CreateShader(vertex, fragment);
-            material.diffuse = Toy3dCore.CreateTexture("Resource/Images/container2.png");
-            material.specular = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png");
+            shaderBox = Toy3dCore.CreateShader(vertex, fragment);
 
+            var diffuse = Toy3dCore.CreateTexture("Resource/Images/container2.png");
+            var specular = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png");            
+            Material material = new Material();
+            material.shader = shaderBox;
+            material.diffuse = diffuse;
+            material.specular = specular;
             material.shininess = 32f;
+            material.textures = new List<Texture> { diffuse, specular };
+
+            box = new Model(new Mesh[] { new Mesh(vertices, indices, material) });
         }
 
         private void AddCamera() {
@@ -127,7 +109,6 @@ namespace Toy3d.Samples {
             var up = new Vector3(0.0f, 1.0f, 0.0f);
             camera = new Camera(front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
             camera.position = new Vector3(0.0f, 2.0f, 3.0f);
-
             camera.Yaw = -90f;
             camera.Pitch = -45f;
             camera.ResetFront();
@@ -164,10 +145,10 @@ namespace Toy3d.Samples {
         }
 
         private void SetDirectionLight(Light light) {
-            var uLocDirection = GL.GetUniformLocation(material.shader.program, "directionLight.direction");
-            var uLocAmbient   = GL.GetUniformLocation(material.shader.program, "directionLight.ambient");
-            var uLocDiffuse   = GL.GetUniformLocation(material.shader.program, "directionLight.diffuse");
-            var uLocSpecular  = GL.GetUniformLocation(material.shader.program, "directionLight.specular");
+            var uLocDirection = GL.GetUniformLocation(shaderBox.program, "directionLight.direction");
+            var uLocAmbient   = GL.GetUniformLocation(shaderBox.program, "directionLight.ambient");
+            var uLocDiffuse   = GL.GetUniformLocation(shaderBox.program, "directionLight.diffuse");
+            var uLocSpecular  = GL.GetUniformLocation(shaderBox.program, "directionLight.specular");
             GL.Uniform3(uLocDirection, light.direction.X, light.direction.Y, light.diffuse.Z);
             GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
             GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
@@ -177,13 +158,13 @@ namespace Toy3d.Samples {
         private void SetPointLight(int index) {
             var light = pointLights[index];
             var PL = "pointLights[" + index + "]";
-            var uLocPosition  = GL.GetUniformLocation(material.shader.program, PL + ".position");
-            var uLocAmbient   = GL.GetUniformLocation(material.shader.program, PL + ".ambient");
-            var uLocDiffuse   = GL.GetUniformLocation(material.shader.program, PL + ".diffuse");
-            var uLocSpecular  = GL.GetUniformLocation(material.shader.program, PL + ".specular");
-            var uLocConstant  = GL.GetUniformLocation(material.shader.program, PL + ".constant");
-            var uLocLinear    = GL.GetUniformLocation(material.shader.program, PL + ".linear");
-            var uLocQuadratic = GL.GetUniformLocation(material.shader.program, PL + ".quadratic");
+            var uLocPosition  = GL.GetUniformLocation(shaderBox.program, PL + ".position");
+            var uLocAmbient   = GL.GetUniformLocation(shaderBox.program, PL + ".ambient");
+            var uLocDiffuse   = GL.GetUniformLocation(shaderBox.program, PL + ".diffuse");
+            var uLocSpecular  = GL.GetUniformLocation(shaderBox.program, PL + ".specular");
+            var uLocConstant  = GL.GetUniformLocation(shaderBox.program, PL + ".constant");
+            var uLocLinear    = GL.GetUniformLocation(shaderBox.program, PL + ".linear");
+            var uLocQuadratic = GL.GetUniformLocation(shaderBox.program, PL + ".quadratic");
             GL.Uniform3(uLocPosition, light.transform.position.X, light.transform.position.Y, light.transform.position.Z);
             GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
             GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
@@ -198,48 +179,20 @@ namespace Toy3d.Samples {
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);            
 
-            DrawDirect();
-
-            SwapBuffers();
-        }
-
-        private void DrawDirect() {
-            GL.BindVertexArray(material.vao);
-
-            var program = material.shader.program;
-            var model = Matrix4.CreateTranslation(0.0f, 0.0f, 0.0f);
-            var view = camera.ViewMatrix;
-            var projection = camera.ProjectionMatrix;
-
-            GL.UseProgram(program);
-            GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
-            GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
-            GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.position.X, camera.position.Y, camera.position.Z);
-
+            GL.UseProgram(shaderBox.program);
             SetDirectionLight(directionLight);
             for (var i=0; i<4; ++i) {
                 SetPointLight(i);
             }
-
-            // material
-            GL.Uniform1(GL.GetUniformLocation(program, "material.shininess"), material.shininess);
-            GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
-            GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);
-            
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, material.diffuse.id);
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, material.specular.id);
-
-            GL.DrawElements(BeginMode.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
-            GL.BindVertexArray(0);
+            box.Draw(camera);
 
             foreach (var light in pointLights) {
                 light.Draw(camera);
-            }            
+            }
+
+            SwapBuffers();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args) {
