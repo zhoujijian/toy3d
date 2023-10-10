@@ -8,7 +8,7 @@ public class GameLifecycle : IGameLifecycle {
     private Shader shaderSprite;
     private Shader shaderParticle;
     private BallSprite ball;
-    private GameWorld2D world;
+    private GameWorld world;
 
     private float intervalLogicFrame = 0f;
 
@@ -19,7 +19,7 @@ public class GameLifecycle : IGameLifecycle {
         shaderSprite = Toy3dCore.CreateSpriteShader();
         shaderParticle = Toy3dCore.CreateParticleShader();
 
-        this.world = (GameWorld2D)world;
+        this.world = (GameWorld)world;
 
         LoadScene();
         LoadBall();
@@ -31,7 +31,7 @@ public class GameLifecycle : IGameLifecycle {
         // GL.BindFramebuffer(FramebufferTarget.Framebuffer, shakeScreen.FramebufferId);
         GL.Clear(ClearBufferMask.ColorBufferBit);
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        world.Draw(elapsed);
+        world.Draw2D(elapsed);
     }
 
     public void OnUpdateFrame(float elapsed) {

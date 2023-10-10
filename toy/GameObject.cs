@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using OpenTK.Mathematics;
+using Toy3d.Game;
 
 namespace Toy3d.Core {
     public class GameObject {
@@ -26,7 +27,7 @@ namespace Toy3d.Core {
 
         public virtual void Draw(Matrix4 projection) { }
 
-        public virtual void Draw(Camera camera) { }
+        public virtual void Draw(IGameWorld world) { }
 
         public ICollection<GameObject> GetChildren() {
             return children;

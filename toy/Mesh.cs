@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
+using Toy3d.Game;
+using System.Linq;
 
 namespace Toy3d.Core {
     public struct Vertex {
@@ -49,18 +51,26 @@ namespace Toy3d.Core {
             GL.BindVertexArray(0);
         }
 
-        public void Draw(Camera camera) {
+        public void Draw(IGameWorld world) {
             var model = Matrix4.CreateTranslation(transform.position.X, transform.position.Y, transform.position.Z);
-            var view = camera.ViewMatrix;
-            var projection = camera.ProjectionMatrix;
+            var view = world.GetCamera().ViewMatrix;
+            var projection = world.GetCamera().ProjectionMatrix;
             var program = material.shader.program;
 
-            // GL.UseProgram(program);
+            GL.UseProgram(program);
+
+            SetDirectionLight(program, world.GetDirectionLight());
+            var pointLights = world.GetPointLights();
+            for (var i=0; i<pointLights.Count(); ++i) {
+                SetPointLight(program, pointLights.ElementAt(i), i);
+            }
+
             // matrix
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
-            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"), camera.position.X, camera.position.Y, camera.position.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"),
+                world.GetCamera().position.X, world.GetCamera().position.Y, world.GetCamera().position.Z);
             // material
             GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
             GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);
@@ -101,6 +111,35 @@ namespace Toy3d.Core {
             GL.BindVertexArray(vao);
             GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
+        }
+
+        private void SetDirectionLight(int program, Light light) {
+            var uLocDirection = GL.GetUniformLocation(program, "directionLight.direction");
+            var uLocAmbient   = GL.GetUniformLocation(program, "directionLight.ambient");
+            var uLocDiffuse   = GL.GetUniformLocation(program, "directionLight.diffuse");
+            var uLocSpecular  = GL.GetUniformLocation(program, "directionLight.specular");
+            GL.Uniform3(uLocDirection, light.direction.X, light.direction.Y, light.diffuse.Z);
+            GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
+            GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
+            GL.Uniform3(uLocSpecular, light.specular.X, light.specular.Y, light.specular.Z);
+        }
+
+        private void SetPointLight(int program, Light light, int index) {
+            var PL = "pointLights[" + index + "]";
+            var uLocPosition  = GL.GetUniformLocation(program, PL + ".position");
+            var uLocAmbient   = GL.GetUniformLocation(program, PL + ".ambient");
+            var uLocDiffuse   = GL.GetUniformLocation(program, PL + ".diffuse");
+            var uLocSpecular  = GL.GetUniformLocation(program, PL + ".specular");
+            var uLocConstant  = GL.GetUniformLocation(program, PL + ".constant");
+            var uLocLinear    = GL.GetUniformLocation(program, PL + ".linear");
+            var uLocQuadratic = GL.GetUniformLocation(program, PL + ".quadratic");
+            GL.Uniform3(uLocPosition, light.position.X, light.position.Y, light.position.Z);
+            GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
+            GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
+            GL.Uniform3(uLocSpecular, light.specular.X, light.specular.Y, light.specular.Z);
+            GL.Uniform1(uLocConstant, light.constant);
+            GL.Uniform1(uLocLinear, light.linear);
+            GL.Uniform1(uLocQuadratic, light.quadratic);
         }
     }
 }

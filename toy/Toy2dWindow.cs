@@ -21,7 +21,7 @@ namespace Toy3d.Game {
             ParticleEmitter.CreateVertexObject();
 
             // 注意参与运算的width/height要和窗口的Size保持一致，否则会导致变形
-            world = new GameWorld2D(Size.X, Size.Y);
+            world = new GameWorld(Size.X, Size.Y);
             game.OnLoad(world);
         }
 

@@ -5,14 +5,12 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 using Toy3d.Core;
+using Toy3d.Game;
 
 namespace Toy3d.Samples {
     public class SampleWindow : GameWindow {
-        private Shader shaderBox;
         private Camera camera;
-        private Light[] pointLights;
-        private Light directionLight;
-        private Model box;
+        private IGameWorld world;
 
         private bool mouseDown = false;
         private float wheelY;
@@ -90,18 +88,18 @@ namespace Toy3d.Samples {
 
             var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
             var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
-            shaderBox = Toy3dCore.CreateShader(vertex, fragment);
-
             var diffuse = Toy3dCore.CreateTexture("Resource/Images/container2.png");
             var specular = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png");            
             Material material = new Material();
-            material.shader = shaderBox;
+            material.shader = Toy3dCore.CreateShader(vertex, fragment);;
             material.diffuse = diffuse;
             material.specular = specular;
             material.shininess = 32f;
-            material.textures = new List<Texture> { diffuse, specular };
-
-            box = new Model(new Mesh[] { new Mesh(vertices, indices, material) });
+            material.textures = new List<Texture> { diffuse, specular };            
+            
+            var box = new Model(new Mesh[] { new Mesh(vertices, indices, material) });
+            world = new GameWorld(Size.X, Size.Y);
+            world.AddGameObject(box);
         }
 
         private void AddCamera() {
@@ -112,66 +110,46 @@ namespace Toy3d.Samples {
             camera.Yaw = -90f;
             camera.Pitch = -45f;
             camera.ResetFront();
+
+            world.SetCamera(camera);
         }
 
         private void AddLights() {
-            var vertex = File.ReadAllText("Resource/Shaders/light.vert");
-            var fragment = File.ReadAllText("Resource/Shaders/light.frag");
-            var shader = Toy3dCore.CreateShader(vertex, fragment);
-            pointLights = new Light[] {
-                new Light(LightType.Point, shader),
-                new Light(LightType.Point, shader),
-                new Light(LightType.Point, shader),
-                new Light(LightType.Point, shader)
-            };
-            pointLights[0].transform.position = new Vector3( 0.7f, 0.2f, 2.0f );
-            pointLights[1].transform.position = new Vector3( 2.3f, -3.3f, -4.0f );
-            pointLights[2].transform.position = new Vector3( -4.0f, 2.0f, -12.0f );
-            pointLights[3].transform.position = new Vector3( 0.0f, 0.0f, -3.0f );
-            foreach (var point in pointLights) {
-                point.ambient = new Vector3(0.05f, 0.05f, 0.05f);
-                point.diffuse = new Vector3(0.8f, 0.8f, 0.8f);
-                point.specular = new Vector3(1.0f, 1.0f, 1.0f);
-                point.constant = 1.0f;
-                point.linear = 0.09f;
-                point.quadratic = 0.032f;
-            }
-
-            directionLight = new Light(LightType.Direction, shader);
+            var directionLight = new Light(LightType.Direction);
             directionLight.direction = new Vector3(-0.2f, -0.1f, -0.3f);
             directionLight.ambient = new Vector3(0.05f, 0.05f, 0.05f);
             directionLight.diffuse = new Vector3(0.4f, 0.4f, 0.4f);
             directionLight.specular = new Vector3(0.5f, 0.5f, 0.5f);
-        }
+            world.SetDirectionLight(directionLight);
 
-        private void SetDirectionLight(Light light) {
-            var uLocDirection = GL.GetUniformLocation(shaderBox.program, "directionLight.direction");
-            var uLocAmbient   = GL.GetUniformLocation(shaderBox.program, "directionLight.ambient");
-            var uLocDiffuse   = GL.GetUniformLocation(shaderBox.program, "directionLight.diffuse");
-            var uLocSpecular  = GL.GetUniformLocation(shaderBox.program, "directionLight.specular");
-            GL.Uniform3(uLocDirection, light.direction.X, light.direction.Y, light.diffuse.Z);
-            GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
-            GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
-            GL.Uniform3(uLocSpecular, light.specular.X, light.specular.Y, light.specular.Z);
-        }
+            var pointLights = new Light[] {
+                new Light(LightType.Point),
+                new Light(LightType.Point),
+                new Light(LightType.Point),
+                new Light(LightType.Point)
+            };
+            pointLights[0].position = new Vector3( 0.7f, 0.2f, 2.0f );
+            pointLights[1].position = new Vector3( 2.3f, -3.3f, -4.0f );
+            pointLights[2].position = new Vector3( -4.0f, 2.0f, -12.0f );
+            pointLights[3].position = new Vector3( 0.0f, 0.0f, -3.0f );
+            for (var i=0; i<pointLights.Length; ++i) {
+                pointLights[i].ambient = new Vector3(0.05f, 0.05f, 0.05f);
+                pointLights[i].diffuse = new Vector3(0.8f, 0.8f, 0.8f);
+                pointLights[i].specular = new Vector3(1.0f, 1.0f, 1.0f);
+                pointLights[i].constant = 1.0f;
+                pointLights[i].linear = 0.09f;
+                pointLights[i].quadratic = 0.032f;
+                world.AddPointLight(pointLights[i]);
+            }
 
-        private void SetPointLight(int index) {
-            var light = pointLights[index];
-            var PL = "pointLights[" + index + "]";
-            var uLocPosition  = GL.GetUniformLocation(shaderBox.program, PL + ".position");
-            var uLocAmbient   = GL.GetUniformLocation(shaderBox.program, PL + ".ambient");
-            var uLocDiffuse   = GL.GetUniformLocation(shaderBox.program, PL + ".diffuse");
-            var uLocSpecular  = GL.GetUniformLocation(shaderBox.program, PL + ".specular");
-            var uLocConstant  = GL.GetUniformLocation(shaderBox.program, PL + ".constant");
-            var uLocLinear    = GL.GetUniformLocation(shaderBox.program, PL + ".linear");
-            var uLocQuadratic = GL.GetUniformLocation(shaderBox.program, PL + ".quadratic");
-            GL.Uniform3(uLocPosition, light.transform.position.X, light.transform.position.Y, light.transform.position.Z);
-            GL.Uniform3(uLocAmbient, light.ambient.X, light.ambient.Y, light.ambient.Z);
-            GL.Uniform3(uLocDiffuse, light.diffuse.X, light.diffuse.Y, light.diffuse.Z);
-            GL.Uniform3(uLocSpecular, light.specular.X, light.specular.Y, light.specular.Z);
-            GL.Uniform1(uLocConstant, light.constant);
-            GL.Uniform1(uLocLinear, light.linear);
-            GL.Uniform1(uLocQuadratic, light.quadratic);
+            var vertex = File.ReadAllText("Resource/Shaders/light.vert");
+            var fragment = File.ReadAllText("Resource/Shaders/light.frag");
+            var shader = Toy3dCore.CreateShader(vertex, fragment);
+            foreach (var point in pointLights) {
+                var cube = new CubeLight(shader);
+                cube.transform.position = point.position;
+                world.AddGameObject(cube);
+            }
         }
 
         protected override void OnRenderFrame(FrameEventArgs args) {
@@ -179,18 +157,9 @@ namespace Toy3d.Samples {
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);            
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.UseProgram(shaderBox.program);
-            SetDirectionLight(directionLight);
-            for (var i=0; i<4; ++i) {
-                SetPointLight(i);
-            }
-            box.Draw(camera);
-
-            foreach (var light in pointLights) {
-                light.Draw(camera);
-            }
+            world.Draw((float)args.Time);
 
             SwapBuffers();
         }
