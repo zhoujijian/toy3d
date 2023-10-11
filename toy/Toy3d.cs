@@ -152,6 +152,28 @@ namespace Toy3d.Core {
             return info;
         }
 
+        public static Texture CreateCubemap(string[] paths) {
+            var info = new Texture();
+            info.id = GL.GenTexture();
+            GL.BindTexture(TextureTarget.TextureCubeMap, info.id);
+
+            for (var i=0; i<6; ++i) {
+                using (var image = new Bitmap(paths[i])) {
+                    image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                    var data = image.LockBits(
+                        new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                }
+            }
+            
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+
+            return info;
+        }
+
         public static Texture CreateTexture(string path) {
             Texture info = new Texture();
             info.id = GL.GenTexture();

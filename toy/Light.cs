@@ -16,9 +16,7 @@ namespace Toy3d.Core {
         public float linear;
         public float quadratic;
         public float radius;
-        
         public Vector3 position;
-
         public readonly LightType type;
 
         public Light(LightType type) {
