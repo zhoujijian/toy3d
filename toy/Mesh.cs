@@ -33,7 +33,7 @@ namespace Toy3d.Core {
             vao = GL.GenVertexArray();
             GL.BindVertexArray(vao);            
             
-            var vbo = GL.GenBuffer();            
+            var vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);            
             var ebo = GL.GenBuffer();
@@ -53,13 +53,13 @@ namespace Toy3d.Core {
 
         public void Draw(IGameWorld world) {
             var model = Matrix4.CreateTranslation(transform.position.X, transform.position.Y, transform.position.Z);
-            var view = world.GetCamera().ViewMatrix;
-            var projection = world.GetCamera().ProjectionMatrix;
+            var view = world.Camera.ViewMatrix;
+            var projection = world.Camera.ProjectionMatrix;
             var program = material.shader.program;
 
             GL.UseProgram(program);
 
-            SetDirectionLight(program, world.GetDirectionLight());
+            SetDirectionLight(program, world.DirectionLight);
             var pointLights = world.GetPointLights();
             for (var i=0; i<pointLights.Count(); ++i) {
                 SetPointLight(program, pointLights.ElementAt(i), i);
@@ -70,7 +70,7 @@ namespace Toy3d.Core {
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uView"), false, ref view);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uProjection"), false, ref projection);
             GL.Uniform3(GL.GetUniformLocation(program, "viewWorldPosition"),
-                world.GetCamera().position.X, world.GetCamera().position.Y, world.GetCamera().position.Z);
+                world.Camera.position.X, world.Camera.position.Y, world.Camera.position.Z);
             // material
             GL.Uniform1(GL.GetUniformLocation(program, "material.diffuse"), 0);
             GL.Uniform1(GL.GetUniformLocation(program, "material.specular"), 1);

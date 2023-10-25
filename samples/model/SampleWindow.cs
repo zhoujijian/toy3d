@@ -25,52 +25,68 @@ namespace Toy3d.Samples {
             AddCube();
             AddCamera();
             AddLights();
+            AddSkybox();
+        }
+
+        private void AddSkybox() {
+            var vertex = File.ReadAllText("Resource/Shaders/skybox.vert");
+            var fragment = File.ReadAllText("Resource/Shaders/skybox.frag");
+            var shader = Toy3dCore.CreateShader(vertex, fragment);
+            var cubemap = Toy3dCore.CreateCubemap(new string[] {
+                "Resource/Images/skybox/right.jpg",
+                "Resource/Images/skybox/left.jpg",
+                "Resource/Images/skybox/top.jpg",
+                "Resource/Images/skybox/bottom.jpg",
+                "Resource/Images/skybox/front.jpg",
+                "Resource/Images/skybox/back.jpg"
+            });
+            world.Skybox = new Skybox(shader, cubemap);
         }
 
         private void AddCube() {
 	        var vertices = new float[] {
                 // xyz               // normals           // uv
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,                
-                -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+                 0.1f,  0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+                 0.1f, -0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+                -0.1f, -0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,                
+                -0.1f, -0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+                -0.1f,  0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+                 0.1f,  0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
 
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-                -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+                -0.1f, -0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+                 0.1f, -0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+                 0.1f,  0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                 0.1f,  0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+                -0.1f,  0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+                -0.1f, -0.1f,  0.1f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-                -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-                -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                -0.1f,  0.1f,  0.1f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                -0.1f,  0.1f, -0.1f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+                -0.1f, -0.1f, -0.1f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                -0.1f, -0.1f, -0.1f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                -0.1f, -0.1f,  0.1f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                -0.1f,  0.1f,  0.1f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-                 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-                 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                 0.1f,  0.1f,  0.1f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+                 0.1f,  0.1f, -0.1f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+                 0.1f, -0.1f, -0.1f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                 0.1f, -0.1f, -0.1f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+                 0.1f, -0.1f,  0.1f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+                 0.1f,  0.1f,  0.1f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-                 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-                 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-                -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-                -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+                -0.1f, -0.1f, -0.1f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+                 0.1f, -0.1f, -0.1f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+                 0.1f, -0.1f,  0.1f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                 0.1f, -0.1f,  0.1f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+                -0.1f, -0.1f,  0.1f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+                -0.1f, -0.1f, -0.1f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-                 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-                 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-                -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-                -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f          
+                -0.1f,  0.1f, -0.1f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+                 0.1f,  0.1f, -0.1f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+                 0.1f,  0.1f,  0.1f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                 0.1f,  0.1f,  0.1f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+                -0.1f,  0.1f,  0.1f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+                -0.1f,  0.1f, -0.1f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f          
             };
 
             // 只使用8个顶点的数据，然后使用索引绘制是不足够的
@@ -106,12 +122,12 @@ namespace Toy3d.Samples {
             var front = new Vector3(0.0f, 0f, -1.0f);
             var up = new Vector3(0.0f, 1.0f, 0.0f);
             camera = new Camera(front, up, 0.3f, 0.1f, 100.0f, Size.X / Size.Y, 60.0f);
-            camera.position = new Vector3(0.0f, 2.0f, 3.0f);
+            camera.position = new Vector3(0.0f, 0.5f, 0.5f);
             camera.Yaw = -90f;
             camera.Pitch = -45f;
             camera.ResetFront();
 
-            world.SetCamera(camera);
+            world.Camera = camera;
         }
 
         private void AddLights() {
@@ -120,7 +136,7 @@ namespace Toy3d.Samples {
             directionLight.ambient = new Vector3(0.05f, 0.05f, 0.05f);
             directionLight.diffuse = new Vector3(0.4f, 0.4f, 0.4f);
             directionLight.specular = new Vector3(0.5f, 0.5f, 0.5f);
-            world.SetDirectionLight(directionLight);
+            world.DirectionLight = directionLight;
 
             var pointLights = new Light[] {
                 new Light(LightType.Point),
@@ -157,7 +173,10 @@ namespace Toy3d.Samples {
 
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
+            // 待分析：若为Less则天空盒无法绘制（在设定深度值为1的情况下：gl_Position = pos.xyww;)
+            GL.DepthFunc(DepthFunction.Lequal);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            // GL.Clear(ClearBufferMask.ColorBufferBit);
 
             world.Draw((float)args.Time);
 

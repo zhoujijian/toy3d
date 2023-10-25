@@ -152,26 +152,26 @@ namespace Toy3d.Core {
             return info;
         }
 
-        public static Texture CreateCubemap(string[] paths) {
-            var info = new Texture();
-            info.id = GL.GenTexture();
-            GL.BindTexture(TextureTarget.TextureCubeMap, info.id);
+        public static int CreateCubemap(string[] paths) {
+            var id = GL.GenTexture();
+            GL.BindTexture(TextureTarget.TextureCubeMap, id);
 
             for (var i=0; i<6; ++i) {
                 using (var image = new Bitmap(paths[i])) {
-                    image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                    // image.RotateFlip(RotateFlipType.RotateNoneFlipY);
                     var data = image.LockBits(
                         new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                     GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                 }
             }
             
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-            return info;
+            return id;
         }
 
         public static Texture CreateTexture(string path) {

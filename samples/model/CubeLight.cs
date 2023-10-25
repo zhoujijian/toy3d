@@ -14,8 +14,8 @@ namespace Toy3d.Samples {
 
         public override void Draw(IGameWorld world) {
             var model = GetModelMatrix();
-            var view = world.GetCamera().ViewMatrix;
-            var projection = world.GetCamera().ProjectionMatrix;
+            var view = world.Camera.ViewMatrix;
+            var projection = world.Camera.ProjectionMatrix;
 
             GL.UseProgram(shader.program);
             GL.UniformMatrix4(GL.GetUniformLocation(shader.program, "uModel"), false, ref model);
