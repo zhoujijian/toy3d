@@ -7,10 +7,11 @@ namespace Toy3d.Game {
         Camera Camera { get; set; }
         Light DirectionLight { get; set; }
         Skybox Skybox { get; set; }
+        Renderer Renderer { get; }
 
         void AddGameObject(GameObject obj);
-        void Draw(float elapsed);
         void Draw2D(float elapsed);
+        void DrawWindow(float elapsed);
         void Update(float elapsed);
         void AddPointLight(Light pointLight);
         IEnumerable<Light> GetPointLights();
@@ -20,16 +21,19 @@ namespace Toy3d.Game {
         public readonly int width;
         public readonly int height;
 
+        private Renderer renderer;
         private List<Light> pointLights = new List<Light>();
         private List<GameObject> gameObjects = new List<GameObject>();
         
         public Skybox Skybox { get; set; }
         public Camera Camera { get; set; }
         public Light DirectionLight { get; set; }
+        public Renderer Renderer => renderer;
 
         public GameWorld(int width, int height) {
             this.width = width;
             this.height = height;
+            renderer = new Renderer(width, height);
         }
 
         public void AddPointLight(Light pointLight) {
@@ -52,11 +56,15 @@ namespace Toy3d.Game {
             }
         }
 
-        public void Draw(float elapsed) {
+        public void Draw() {
             foreach (var obj in gameObjects) {
                 obj.Draw(this);
             }
             Skybox.Draw(this);
+        }
+
+        public void DrawWindow(float elapsed) {
+            renderer.Draw(this, elapsed);
         }
 
         public void Update(float elapsed) {

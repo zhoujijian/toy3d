@@ -113,6 +113,43 @@ namespace Toy3d.Core {
             return CreateShader(vertex, fragment);
         }
 
+        public static Shader CreateFramebufferShader() {
+            const string vertex = @"
+                #version 330 core
+
+                layout(location = 0) in vec2 aPosition;
+                layout(location = 1) in vec2 aTexCoord;
+
+                out vec2 texCoords;
+
+                void main() {
+                    texCoords = aTexCoord;
+                    gl_Position = vec4(aPosition.x, aPosition.y, 0, 1.0);
+                }
+            ";
+
+            const string fragment = @"
+                #version 330
+
+                in vec2 texCoords;
+                uniform sampler2D uTexture;
+                out vec4 color;
+
+                void main() {
+                    color = texture(uTexture, texCoords);
+
+                    // 1)inversion(反相)
+                    // color = vec4(vec3(1 - texture(uTexture, texCoords)), 1.0);
+
+                    // 2)grayscale(加权灰度)
+                    // float average = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+                    // color = vec4(average, average, average, 1.0);
+                }
+            ";
+
+            return CreateShader(vertex, fragment);
+        }
+
         public static Shader CreateShader(string vertexSource, string fragmentSource) {
             var vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, vertexSource);

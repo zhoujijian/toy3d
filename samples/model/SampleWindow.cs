@@ -26,6 +26,8 @@ namespace Toy3d.Samples {
             AddCamera();
             AddLights();
             AddSkybox();
+
+            world.Renderer.AddRenderTarget();
         }
 
         private void AddSkybox() {
@@ -171,14 +173,7 @@ namespace Toy3d.Samples {
         protected override void OnRenderFrame(FrameEventArgs args) {
             base.OnRenderFrame(args);
 
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.DepthTest);
-            // 待分析：若为Less则天空盒无法绘制（在设定深度值为1的情况下：gl_Position = pos.xyww;)
-            GL.DepthFunc(DepthFunction.Lequal);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            // GL.Clear(ClearBufferMask.ColorBufferBit);
-
-            world.Draw((float)args.Time);
+            world.DrawWindow((float)args.Time);
 
             SwapBuffers();
         }
@@ -219,7 +214,7 @@ namespace Toy3d.Samples {
             camera.Yaw = camera.Yaw + e.DeltaX * camera.Sensitivity;
             camera.Pitch = camera.Pitch + (-e.DeltaY) * camera.Sensitivity;
             if (camera.Pitch >  89.0f) { camera.Pitch =  89.0f; }
-            if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }            
+            if (camera.Pitch < -89.0f) { camera.Pitch = -89.0f; }
 
             camera.ResetFront();
         }
