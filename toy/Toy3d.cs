@@ -136,7 +136,9 @@ namespace Toy3d.Core {
                 out vec4 color;
 
                 void main() {
-                    color = texture(uTexture, texCoords);
+                    float depth = texture(uTexture, texCoords).r;
+                    color = vec4(vec3(depth), 1.0);
+                    // color = texture(uTexture, texCoords);
 
                     // 1)inversion(反相)
                     // color = vec4(vec3(1 - texture(uTexture, texCoords)), 1.0);
@@ -145,6 +147,30 @@ namespace Toy3d.Core {
                     // float average = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
                     // color = vec4(average, average, average, 1.0);
                 }
+            ";
+
+            return CreateShader(vertex, fragment);
+        }
+
+        public static Shader CreateShadowShader() {
+            const string vertex = @"
+                #version 330 core
+
+                layout(location = 0) in vec3 position;
+
+                uniform mat4 projectionLight;
+                uniform mat4 viewLight;
+                uniform mat4 model;
+
+                void main() {
+                    gl_Position = projectionLight * viewLight * model * vec4(position, 1.0f);
+                }
+            ";
+
+            const string fragment = @"
+                #version 330
+
+                void main() { }
             ";
 
             return CreateShader(vertex, fragment);

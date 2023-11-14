@@ -15,6 +15,7 @@ namespace Toy3d.Game {
         void Update(float elapsed);
         void AddPointLight(Light pointLight);
         IEnumerable<Light> GetPointLights();
+        IEnumerable<GameObject> GetGameObjects();
     }
 
     public class GameWorld : IGameWorld {
@@ -44,6 +45,10 @@ namespace Toy3d.Game {
             return pointLights;
         }
 
+        public IEnumerable<GameObject> GetGameObjects() {
+            return gameObjects;
+        }
+
         public void AddGameObject(GameObject obj) {
             gameObjects.Add(obj);
         }
@@ -54,13 +59,6 @@ namespace Toy3d.Game {
             foreach (var obj in gameObjects) {
                 obj.Draw(projection);
             }
-        }
-
-        public void Draw() {
-            foreach (var obj in gameObjects) {
-                obj.Draw(this);
-            }
-            Skybox.Draw(this);
         }
 
         public void DrawWindow(float elapsed) {

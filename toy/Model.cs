@@ -8,9 +8,9 @@ namespace Toy3d.Core {
             this.meshes = meshes;
         }
 
-        public override void Draw(IGameWorld world) {
+        public override void Draw(IGameWorld world, RenderContext context) {
             foreach (var mesh in meshes) {
-                mesh.Draw(world);
+                world.Renderer.DrawMesh(world, mesh, context);
             }
         }
     }

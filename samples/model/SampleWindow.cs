@@ -26,8 +26,6 @@ namespace Toy3d.Samples {
             AddCamera();
             AddLights();
             AddSkybox();
-
-            world.Renderer.AddRenderTarget();
         }
 
         private void AddSkybox() {
@@ -138,6 +136,7 @@ namespace Toy3d.Samples {
             directionLight.ambient = new Vector3(0.05f, 0.05f, 0.05f);
             directionLight.diffuse = new Vector3(0.4f, 0.4f, 0.4f);
             directionLight.specular = new Vector3(0.5f, 0.5f, 0.5f);
+            directionLight.position = new Vector3(0.7f, 0.2f, 2.0f); // For ShadowMap
             world.DirectionLight = directionLight;
 
             var pointLights = new Light[] {

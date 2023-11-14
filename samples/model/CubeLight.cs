@@ -12,7 +12,7 @@ namespace Toy3d.Samples {
             this.cube = Primitive.CreateCube();
         }
 
-        public override void Draw(IGameWorld world) {
+        public override void Draw(IGameWorld world, RenderContext context) {
             var model = GetModelMatrix();
             var view = world.Camera.ViewMatrix;
             var projection = world.Camera.ProjectionMatrix;
