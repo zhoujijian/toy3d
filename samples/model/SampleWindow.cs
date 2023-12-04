@@ -22,7 +22,14 @@ namespace Toy3d.Samples {
         protected override void OnLoad() {
             base.OnLoad();
 
-            AddCube();
+            world = new GameWorld(Size.X, Size.Y);
+
+            // var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
+            // var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
+            var vertex = File.ReadAllText("Resource/Shaders/shadow.vert");
+            var fragment = File.ReadAllText("Resource/Shaders/shadow.frag");
+            AddBox(vertex, fragment);
+            AddPlane(vertex, fragment);
             AddCamera();
             AddLights();
             AddSkybox();
@@ -43,7 +50,14 @@ namespace Toy3d.Samples {
             world.Skybox = new Skybox(shader, cubemap);
         }
 
-        private void AddCube() {
+        private Model AddPlane(string vertex, string fragment) {
+            var plane = AddBox(vertex, fragment);
+            plane.transform.scale = new Vector3(4, -0.1f, 4);
+            plane.transform.position = new Vector3(0, -0.5f, 0);
+            return plane;
+        }
+
+        private Model AddBox(string vertex, string fragment) {
 	        var vertices = new float[] {
                 // xyz               // normals           // uv
                  0.1f,  0.1f, -0.1f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -102,20 +116,19 @@ namespace Toy3d.Samples {
                 32, 31, 30, 35, 34, 33
             };
 
-            var vertex = File.ReadAllText("Resource/Shaders/shader.vert");
-            var fragment = File.ReadAllText("Resource/Shaders/shader.frag");
             var diffuse = Toy3dCore.CreateTexture("Resource/Images/container2.png");
             var specular = Toy3dCore.CreateTexture("Resource/Images/container2_specular.png");            
             Material material = new Material();
-            material.shader = Toy3dCore.CreateShader(vertex, fragment);;
+            material.shader = Toy3dCore.CreateShader(vertex, fragment);
             material.diffuse = diffuse;
             material.specular = specular;
             material.shininess = 32f;
             material.textures = new List<Texture> { diffuse, specular };            
             
-            var box = new Model(new Mesh[] { new Mesh(vertices, indices, material) });
-            world = new GameWorld(Size.X, Size.Y);
-            world.AddGameObject(box);
+            var cube = new Model(new Mesh[] { new Mesh(vertices, indices, material) });
+            world.AddGameObject(cube);
+
+            return cube;
         }
 
         private void AddCamera() {

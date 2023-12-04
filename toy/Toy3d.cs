@@ -113,6 +113,47 @@ namespace Toy3d.Core {
             return CreateShader(vertex, fragment);
         }
 
+        public static Shader CreateShadowFramebufferShader() {
+            const string vertex = @"
+                #version 330 core
+
+                layout(location = 0) in vec2 aPosition;
+                layout(location = 1) in vec2 aTexCoord;
+
+                out vec2 texCoords;
+
+                void main() {
+                    texCoords = aTexCoord;
+                    gl_Position = vec4(aPosition.x, aPosition.y, 0, 1.0);
+                }
+            ";
+
+            const string fragment = @"
+                #version 330
+
+                in vec2 texCoords;
+                uniform sampler2D uTexture;
+                uniform float near;
+                uniform float far;
+
+                out vec4 color;
+
+                // required when using a perspective projection matrix
+                float LinearizeDepth(float depth) {
+                    float z = depth * 2.0 - 1.0; // Back to NDC
+                    return (2.0 * near * far) / (far + near - z * (far - near));;
+                }
+
+                void main() {
+                    float depth = texture(uTexture, texCoords).r;
+                    // color = vec4(vec3(depth), 1.0);
+                    color = vec4(vec3(LinearizeDepth(depth) / far), 1.0); // perspective
+                }
+            ";
+
+            return CreateShader(vertex, fragment);
+        }
+
         public static Shader CreateFramebufferShader() {
             const string vertex = @"
                 #version 330 core

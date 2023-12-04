@@ -22,10 +22,11 @@ namespace Toy3d.Core {
 
     public struct RenderContext {
         public int id;
+        public Matrix4 parent;
 
         public const int NORMAL = 0;
-        public const int LIGHT = 1;
-        public const int SHADOW = 2;
+        public const int SHADOW = 1;
+        public const int DEPTH = 2;
     }
 
     public class Renderer {
@@ -37,6 +38,8 @@ namespace Toy3d.Core {
 
         private const int SHADOW_WIDTH  = 1024;
         private const int SHADOW_HEIGHT = 1024;
+        private const float SHADOW_LIGHT_NEAR = 0.5f;
+        private const float SHADOW_LIGHT_FAR = 2.5f;
 
         public bool EnableShadow { get; set; }
 
@@ -81,11 +84,12 @@ namespace Toy3d.Core {
 
         public void Draw(IGameWorld world, float elapsed) {
             if (renderShadow.framebufferId <= 0) {
-                AddRenderShadow();
+                AddRenderDepthMap();
             }
             DrawShadowDepthMap(world);
             GL.Viewport(0, 0, width, height);
-            DrawRenderTarget(renderShadow);
+            // DrawRenderTarget(renderShadow);
+            DrawWorldShadow(world);
 
             /*
             if (renderTarget.id <= 0) {
@@ -97,10 +101,12 @@ namespace Toy3d.Core {
         }
 
         public void DrawMesh(IGameWorld world, Mesh mesh, RenderContext context) {
-            if (context.id == RenderContext.SHADOW) {
-                DrawMeshShadow(world, mesh);
+            if (context.id == RenderContext.DEPTH) {
+                DrawMeshDepth(world, mesh, context);
             } else if (context.id == RenderContext.NORMAL) {
-                DrawMeshNormal(world, mesh);
+                DrawMeshNormal(world, mesh, context);
+            } else if (context.id == RenderContext.SHADOW) {
+                DrawMeshShadow(world, mesh, context);
             }
         }
 
@@ -109,6 +115,62 @@ namespace Toy3d.Core {
                 gameObject.Draw(world, context);
             }
         }
+
+        #region Shadow
+        private Matrix4 GetLightMatrix(IGameWorld world, int program) {
+            var L = world.DirectionLight;
+            var view = Matrix4.LookAt(L.position, L.position + L.direction, Vector3.UnitY);
+            // var projection = Matrix4.CreateOrthographicOffCenter(-1f, 1f, -1f, 1f, SHADOW_LIGHT_NEAR, SHADOW_LIGHT_FAR);
+            var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), 1.0f, SHADOW_LIGHT_NEAR, SHADOW_LIGHT_FAR);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "projectionLight"), false, ref projection);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "viewLight"), false, ref view);
+            return projection * view;
+        }
+
+        private void DrawMeshShadow(IGameWorld world, Mesh mesh, RenderContext context) {
+            var program = mesh.material.shader.program;
+            GL.UseProgram(program);
+
+            // uniform
+            var position = mesh.transform.position;
+            var model = context.parent * Matrix4.CreateTranslation(position.X, position.Y, position.Z);
+            var view = world.Camera.ViewMatrix;
+            var projection = world.Camera.ProjectionMatrix;
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "model"), false, ref model);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "view"), false, ref view);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "projection"), false, ref projection);
+            GL.Uniform3(GL.GetUniformLocation(program, "viewPos"),
+                world.Camera.position.X, world.Camera.position.Y, world.Camera.position.Z);
+            GL.Uniform3(GL.GetUniformLocation(program, "lightPos"),
+                world.DirectionLight.position.X, world.DirectionLight.position.Y, world.DirectionLight.position.Z);
+            var light = GetLightMatrix(world, program);
+            GL.UniformMatrix4(GL.GetUniformLocation(program, "lightSpaceMatrix"), false, ref light);
+
+            // material
+            GL.Uniform1(GL.GetUniformLocation(program, "diffuseTexture"), 0);
+            GL.Uniform1(GL.GetUniformLocation(program, "shadowMap"), 1);
+            // texture
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, mesh.material.diffuse.id);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, renderShadow.texture.id);
+
+            mesh.Draw();
+        }
+
+        private void DrawWorldShadow(IGameWorld world) {
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            // 待分析：若为Less则天空盒无法绘制（在设定深度值为1的情况下：gl_Position = pos.xyww;)
+            GL.DepthFunc(DepthFunction.Lequal);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            DrawGameObjects(world, new RenderContext {
+                id = RenderContext.SHADOW,
+                parent = Matrix4.Identity
+            });
+            world.Skybox.Draw(world);
+        }
+        #endregion
 
         #region RenderTarget
         private void AddRenderTarget() {
@@ -154,6 +216,8 @@ namespace Toy3d.Core {
             // GL.LineWidth(4.0f);
             GL.UseProgram(rt.shader.program);
             GL.Uniform1(GL.GetUniformLocation(rt.shader.program, "uTexture"), 0);
+            GL.Uniform1(GL.GetUniformLocation(rt.shader.program, "near"), SHADOW_LIGHT_NEAR);
+            GL.Uniform1(GL.GetUniformLocation(rt.shader.program, "far"), SHADOW_LIGHT_FAR);
             GL.BindVertexArray(rt.vdata.vao);            
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, rt.texture.id);
@@ -162,8 +226,7 @@ namespace Toy3d.Core {
         }
         #endregion
 
-        #region Shadow
-
+        #region DepthMap
         // 排查记录：
         // 1）测试正交相机在无阴影、无Framebuffer情形下是否正常渲染；（适当调整正交相机区域，避免目标过小而看不到）
         // 2）测试Framebuffer在不读取深度纹理情形下是否正常渲染；
@@ -174,32 +237,37 @@ namespace Toy3d.Core {
             var program = shadowMapShader.program;
             GL.UseProgram(program);
             
-            var view = Matrix4.LookAt(new Vector3(5f, 5f, 5f), new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f));
-            var projection = Matrix4.CreateOrthographicOffCenter(-1, 1, -1, 1, 0.0f, 10f);
+            var L = world.DirectionLight;
+            var view = Matrix4.LookAt(L.position, L.position + L.direction, Vector3.UnitY);
+            // var projection = Matrix4.CreateOrthographicOffCenter(-1f, 1f, -1f, 1f, SHADOW_LIGHT_NEAR, SHADOW_LIGHT_FAR);
+            var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), 1.0f, SHADOW_LIGHT_NEAR, SHADOW_LIGHT_FAR);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "projectionLight"), false, ref projection);
             GL.UniformMatrix4(GL.GetUniformLocation(program, "viewLight"), false, ref view);
             
             if (renderShadow.framebufferId > 0) {
                 GL.Viewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, renderShadow.framebufferId);                
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, renderShadow.framebufferId);
             }
             // 打开深度测试选项，否则不会写出深度信息
             // 且必须在GL.BindFramebuffer之后打开，否则不会对缓冲区纹理生效！
             GL.Enable(EnableCap.DepthTest);
             GL.Clear(ClearBufferMask.DepthBufferBit);
-            DrawGameObjects(world, new RenderContext { id = RenderContext.SHADOW });
+            DrawGameObjects(world, new RenderContext {
+                id = RenderContext.DEPTH,
+                parent = Matrix4.Identity
+            });
             if (renderShadow.framebufferId > 0) {
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             }
         }
 
-        private void DrawMeshShadow(IGameWorld world, Mesh mesh) {
-            var model = Matrix4.CreateTranslation(mesh.transform.position);
+        private void DrawMeshDepth(IGameWorld world, Mesh mesh, RenderContext context) {
+            var model = context.parent * Matrix4.CreateTranslation(mesh.transform.position);
             GL.UniformMatrix4(GL.GetUniformLocation(shadowMapShader.program, "model"), false, ref model);
             mesh.Draw();
         }
 
-        private void AddRenderShadow() {
+        private void AddRenderDepthMap() {
             var texid = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, texid);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent, SHADOW_WIDTH, SHADOW_HEIGHT, 0, PixelFormat.DepthComponent, PixelType.Float, 0);
@@ -220,13 +288,13 @@ namespace Toy3d.Core {
 
             renderShadow = new RenderParams() {
                 framebufferId = framebufferId,
-                shader = Toy3dCore.CreateFramebufferShader(),
+                shader = Toy3dCore.CreateShadowFramebufferShader(),
                 vdata = CreateFramebufferVertexData(),
                 texture = new Texture { id = texid, width = SHADOW_WIDTH, height = SHADOW_HEIGHT }
             };
         }
 
-        private void DestroyShadow() {
+        private void DestroyDepthMap() {
             GL.DeleteFramebuffer(renderShadow.framebufferId);
             GL.DeleteBuffer(renderShadow.vdata.ebo);
             GL.DeleteBuffer(renderShadow.vdata.vbo);
@@ -250,15 +318,18 @@ namespace Toy3d.Core {
             // 待分析：若为Less则天空盒无法绘制（在设定深度值为1的情况下：gl_Position = pos.xyww;)
             GL.DepthFunc(DepthFunction.Lequal);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            DrawGameObjects(world, new RenderContext { id = RenderContext.NORMAL });
+            DrawGameObjects(world, new RenderContext {
+                id = RenderContext.NORMAL,
+                parent = Matrix4.Identity
+            });
             world.Skybox.Draw(world);
 
             if (renderTarget.framebufferId > 0) {
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            }            
+            }
         }
 
-        private void DrawMeshNormal(IGameWorld world, Mesh mesh) {
+        private void DrawMeshNormal(IGameWorld world, Mesh mesh, RenderContext context) {
             var program = mesh.material.shader.program;
             GL.UseProgram(program);
 
@@ -270,7 +341,7 @@ namespace Toy3d.Core {
 
             // matrix
             var position = mesh.transform.position;
-            var model = Matrix4.CreateTranslation(position.X, position.Y, position.Z);
+            var model = context.parent * Matrix4.CreateTranslation(position.X, position.Y, position.Z);
             var view = world.Camera.ViewMatrix;
             var projection = world.Camera.ProjectionMatrix;           
             GL.UniformMatrix4(GL.GetUniformLocation(program, "uModel"), false, ref model);

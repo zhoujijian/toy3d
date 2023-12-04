@@ -9,6 +9,7 @@ namespace Toy3d.Core {
         }
 
         public override void Draw(IGameWorld world, RenderContext context) {
+            context.parent *= GetModelMatrix();
             foreach (var mesh in meshes) {
                 world.Renderer.DrawMesh(world, mesh, context);
             }

@@ -27,6 +27,7 @@ namespace Toy3d.Core {
 
         public virtual void Draw(Matrix4 projection) { }
         public virtual void Draw(IGameWorld world, RenderContext context) {
+            context.parent *= GetModelMatrix();
             children.ForEach(x => x.Draw(world, context));
         }
 
